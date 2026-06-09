@@ -20,7 +20,9 @@ the frontend (React + Vite SPA served as Worker static assets). Data lives in Cl
 
 ## How a round works
 
-1. The host signs in, picks categories, player count, and impostor count, and taps **Start game**.
+1. The host signs in and taps **New game** on the home screen, then sets up the round in two
+   steps: categories first, then player and impostor counts. The profile button on the home
+   screen opens a modal to switch language or sign out.
 2. The server picks a random word (+ hint) from the selected categories.
 3. The phone is passed around: each player privately reveals their word — impostors see the hint
    instead.

@@ -143,20 +143,110 @@ h2 {
 
 .topbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   padding-bottom: 8px;
 }
 
-.topbar-user {
-  color: var(--muted);
-  font-size: 0.9rem;
+/* ----- profile button & avatar ----- */
+
+.profile-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--surface-2);
+  border-radius: 999px;
+  padding: 6px 14px 6px 6px;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.topbar-actions {
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.avatar-default {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* ----- profile modal ----- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 10;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-profile {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.modal-profile .avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 1.3rem;
+}
+
+.modal-name {
+  font-weight: 700;
+}
+
+.modal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--surface-2);
+  padding-top: 16px;
+}
+
+.modal .button.big {
+  margin-top: 0;
+}
+
+/* ----- setup wizard header ----- */
+
+.setup-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 4px;
+}
+
+.button.round.back {
+  width: 40px;
+  height: 40px;
+  font-size: 1.1rem;
 }
 
 /* ----- locale switcher ----- */

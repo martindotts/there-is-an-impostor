@@ -17,7 +17,13 @@ export interface Messages {
   noProviders: string;
   loading: string;
   signOut: string;
+  language: string;
+  close: string;
   newGame: string;
+  next: string;
+  back: string;
+  stepOf: (step: number, total: number) => string;
+  playersAndImpostors: string;
   categories: string;
   selectAll: string;
   clearAll: string;
@@ -63,7 +69,13 @@ const en: Messages = {
   noProviders: 'No login providers are configured yet. See the README for setup instructions.',
   loading: 'Loading…',
   signOut: 'Sign out',
+  language: 'Language',
+  close: 'Close',
   newGame: 'New game',
+  next: 'Next',
+  back: 'Back',
+  stepOf: (step, total) => `Step ${step} of ${total}`,
+  playersAndImpostors: 'Players & impostors',
   categories: 'Categories',
   selectAll: 'Select all',
   clearAll: 'Clear all',
@@ -113,7 +125,13 @@ const es: Messages = {
   noProviders: 'Todavía no hay proveedores de inicio de sesión configurados. Consulta el README.',
   loading: 'Cargando…',
   signOut: 'Cerrar sesión',
-  newGame: 'Nueva partida',
+  language: 'Idioma',
+  close: 'Cerrar',
+  newGame: 'Nuevo juego',
+  next: 'Siguiente',
+  back: 'Atrás',
+  stepOf: (step, total) => `Paso ${step} de ${total}`,
+  playersAndImpostors: 'Jugadores e impostores',
   categories: 'Categorías',
   selectAll: 'Seleccionar todas',
   clearAll: 'Quitar todas',

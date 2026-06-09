@@ -5,6 +5,7 @@ export interface SessionUser {
   name: string;
   email: string | null;
   provider: string;
+  picture: string | null;
 }
 
 export interface Category {

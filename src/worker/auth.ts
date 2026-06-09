@@ -27,16 +27,18 @@ async function upsertUser(
   providerId: string,
   email: string | null,
   name: string | null,
+  picture: string | null,
 ): Promise<SessionUser> {
   const row = await db
     .prepare(
-      `INSERT INTO users (provider, provider_id, email, name) VALUES (?1, ?2, ?3, ?4)
+      `INSERT INTO users (provider, provider_id, email, name, picture) VALUES (?1, ?2, ?3, ?4, ?5)
        ON CONFLICT(provider, provider_id) DO UPDATE SET
          email = COALESCE(excluded.email, users.email),
-         name = COALESCE(excluded.name, users.name)
-       RETURNING id, provider, provider_id, email, name`,
+         name = COALESCE(excluded.name, users.name),
+         picture = COALESCE(excluded.picture, users.picture)
+       RETURNING id, provider, provider_id, email, name, picture`,
     )
-    .bind(provider, providerId, email, name)
+    .bind(provider, providerId, email, name, picture)
     .first<UserRow>();
   if (!row) throw new Error('failed to upsert user');
   return {
@@ -44,6 +46,7 @@ async function upsertUser(
     name: row.name ?? row.email?.split('@')[0] ?? 'Player',
     email: row.email,
     provider: row.provider,
+    picture: row.picture,
   };
 }
 
@@ -107,8 +110,9 @@ authRoutes.get('/google/callback', async (c) => {
   if (typeof payload.sub !== 'string') return c.text('Malformed id_token', 502);
   const email = typeof payload.email === 'string' ? payload.email : null;
   const name = typeof payload.name === 'string' ? payload.name : null;
+  const picture = typeof payload.picture === 'string' ? payload.picture : null;
 
-  const user = await upsertUser(c.env.DB, 'google', payload.sub, email, name);
+  const user = await upsertUser(c.env.DB, 'google', payload.sub, email, name, picture);
   await createSession(c, user);
   return c.redirect('/');
 });
@@ -222,7 +226,7 @@ authRoutes.post('/apple/callback', async (c) => {
     }
   }
 
-  const user = await upsertUser(c.env.DB, 'apple', payload.sub, email, name);
+  const user = await upsertUser(c.env.DB, 'apple', payload.sub, email, name, null);
   await createSession(c, user);
   return c.redirect('/');
 });
@@ -234,7 +238,7 @@ authRoutes.post('/apple/callback', async (c) => {
 authRoutes.get('/dev', async (c) => {
   if (c.env.DEV_AUTH !== 'true') return c.text('Not found', 404);
   const name = new URL(c.req.url).searchParams.get('name') ?? 'Dev Player';
-  const user = await upsertUser(c.env.DB, 'dev', name.toLowerCase(), `${name.toLowerCase()}@example.dev`, name);
+  const user = await upsertUser(c.env.DB, 'dev', name.toLowerCase(), `${name.toLowerCase()}@example.dev`, name, null);
   await createSession(c, user);
   return c.redirect('/');
 });

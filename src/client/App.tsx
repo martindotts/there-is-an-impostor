@@ -3,8 +3,9 @@ import type { Category, SessionUser, StartGameRequest } from '../shared/types';
 import { api } from './api';
 import type { ActiveGame } from './game';
 import { buildGame } from './game';
-import { LocaleSwitcher, useI18n } from './i18n';
+import { useI18n } from './i18n';
 import { LoginScreen } from './screens/LoginScreen';
+import { HomeScreen } from './screens/HomeScreen';
 import { SetupScreen } from './screens/SetupScreen';
 import { RevealScreen } from './screens/RevealScreen';
 import { DiscussionScreen } from './screens/DiscussionScreen';
@@ -13,6 +14,7 @@ import { ResultsScreen } from './screens/ResultsScreen';
 type Screen =
   | { name: 'loading' }
   | { name: 'login' }
+  | { name: 'home' }
   | { name: 'setup' }
   | { name: 'reveal'; game: ActiveGame }
   | { name: 'discussion'; game: ActiveGame }
@@ -32,7 +34,7 @@ export function App() {
       .me()
       .then(({ user }) => {
         setUser(user);
-        setScreen(user ? { name: 'setup' } : { name: 'login' });
+        setScreen(user ? { name: 'home' } : { name: 'login' });
       })
       .catch((err: Error) => {
         setError(err.message);
@@ -77,18 +79,6 @@ export function App() {
 
   return (
     <div className="app">
-      {user && screen.name === 'setup' && (
-        <header className="topbar">
-          <span className="topbar-user">{user.name}</span>
-          <span className="topbar-actions">
-            <LocaleSwitcher />
-            <button className="link-button" onClick={logout}>
-              {m.signOut}
-            </button>
-          </span>
-        </header>
-      )}
-
       {error && <div className="error-banner">{error}</div>}
       {notice && screen.name === 'reveal' && <div className="info-banner">{notice}</div>}
 
@@ -96,8 +86,17 @@ export function App() {
 
       {screen.name === 'login' && <LoginScreen />}
 
+      {screen.name === 'home' && user && (
+        <HomeScreen user={user} onNewGame={() => setScreen({ name: 'setup' })} onLogout={logout} />
+      )}
+
       {screen.name === 'setup' && (
-        <SetupScreen categories={categories} initialConfig={lastConfig} onStart={startGame} />
+        <SetupScreen
+          categories={categories}
+          initialConfig={lastConfig}
+          onStart={startGame}
+          onBack={() => setScreen({ name: 'home' })}
+        />
       )}
 
       {screen.name === 'reveal' && (

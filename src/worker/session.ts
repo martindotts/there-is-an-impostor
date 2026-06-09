@@ -14,6 +14,7 @@ export async function createSession(c: Context<AppContext>, user: SessionUser): 
       name: user.name,
       email: user.email,
       provider: user.provider,
+      picture: user.picture,
       exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS,
     },
     c.env.SESSION_SECRET,
@@ -37,6 +38,7 @@ export async function getSessionUser(c: Context<AppContext>): Promise<SessionUse
       name: String(payload.name ?? 'Player'),
       email: payload.email == null ? null : String(payload.email),
       provider: String(payload.provider ?? 'unknown'),
+      picture: payload.picture == null ? null : String(payload.picture),
     };
   } catch {
     return null;

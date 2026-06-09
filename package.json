@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.worker.json --noEmit",
+    "check": "tsc -p tsconfig.json --noEmit && tsc -p src/worker/tsconfig.json --noEmit",
     "deploy": "npm run build && wrangler deploy --config dist/there_is_an_imposter/wrangler.json",
     "db:migrate:local": "wrangler d1 migrations apply imposter-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply imposter-db --remote"
