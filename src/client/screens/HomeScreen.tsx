@@ -61,6 +61,9 @@ function ProfileModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close" aria-label={m.close} onClick={onClose}>
+          ✕
+        </button>
         <div className="modal-profile">
           <Avatar user={user} />
           <div>
@@ -76,9 +79,6 @@ function ProfileModal({
 
         <button className="button big" onClick={onLogout}>
           {m.signOut}
-        </button>
-        <button className="link-button" onClick={onClose}>
-          {m.close}
         </button>
       </div>
     </div>

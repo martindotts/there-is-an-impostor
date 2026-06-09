@@ -92,7 +92,7 @@ export function SetupScreen({
             <div className="section-header">
               <span className="muted small">{m.selectAtLeastOne}</span>
               <button
-                className="link-button"
+                className="button small"
                 onClick={() =>
                   setSelected(allSelected ? new Set() : new Set(categories.map((c) => c.id)))
                 }
