@@ -28,28 +28,32 @@ export interface Messages {
   selectAll: string;
   clearAll: string;
   selectAtLeastOne: string;
-  players: string;
   impostors: string;
-  playersLabel: (n: number) => string;
+  playersWithCount: (n: number) => string;
   impostorsLabel: (n: number) => string;
   impostorsCap: (cap: number, players: number) => string;
+  playerNamePlaceholder: string;
+  addPlayer: string;
+  removePlayer: (name: string) => string;
+  needMorePlayers: (min: number) => string;
+  maxPlayersReached: (max: number) => string;
   startGame: string;
   starting: string;
   poolReset: string;
   decrease: string;
   increase: string;
-  playerOf: (n: number, total: number) => string;
-  playerName: (n: number) => string;
+  whoHasPhone: string;
+  passPhoneHint: string;
   privacyNote: string;
   tapToReveal: string;
+  hide: string;
+  startDiscussion: string;
   categoryLabel: (name: string) => string;
   youAreImpostor: string;
   yourHint: string;
   blendIn: string;
   secretWordIs: string;
   describeCarefully: string;
-  hideAndPass: (next: number) => string;
-  hideAndDiscuss: string;
   discussionTime: string;
   discussionRules: (impostorCount: number) => string;
   impostorsHiding: (n: number) => string;
@@ -80,28 +84,32 @@ const en: Messages = {
   selectAll: 'Select all',
   clearAll: 'Clear all',
   selectAtLeastOne: 'Select at least one category.',
-  players: 'Players',
   impostors: 'Impostors',
-  playersLabel: (n) => `${n} players`,
+  playersWithCount: (n) => `Players (${n})`,
   impostorsLabel: (n) => (n === 1 ? '1 impostor' : `${n} impostors`),
   impostorsCap: (cap, players) => `Up to ${cap} for ${players} players.`,
+  playerNamePlaceholder: 'Player name',
+  addPlayer: 'Add',
+  removePlayer: (name) => `Remove ${name}`,
+  needMorePlayers: (min) => `You need at least ${min} players.`,
+  maxPlayersReached: (max) => `Maximum ${max} players.`,
   startGame: 'Start game',
   starting: 'Starting…',
   poolReset: "You've seen every word in these categories, so the deck was reshuffled — words may repeat from now on.",
   decrease: 'decrease',
   increase: 'increase',
-  playerOf: (n, total) => `Player ${n} of ${total}`,
-  playerName: (n) => `Player ${n}`,
+  whoHasPhone: 'Who has the phone?',
+  passPhoneHint: 'Pass the phone around. Each player taps their own name to see their word.',
   privacyNote: 'Make sure nobody else can see the screen.',
   tapToReveal: 'Tap to reveal',
+  hide: 'Hide',
+  startDiscussion: 'Start discussion',
   categoryLabel: (name) => `Category: ${name}`,
   youAreImpostor: '🕵️ You are an impostor',
   yourHint: 'Your hint:',
   blendIn: "Blend in. Don't let them figure out you don't know the word.",
   secretWordIs: 'The secret word is:',
   describeCarefully: 'Describe it without giving it away — impostors are listening.',
-  hideAndPass: (next) => `Hide & pass to Player ${next}`,
-  hideAndDiscuss: 'Hide & start discussion',
   discussionTime: 'Discussion time',
   discussionRules: (impostorCount) =>
     `starts. Going around, everyone says one word or phrase about the secret word. Then vote on who the ${
@@ -136,28 +144,32 @@ const es: Messages = {
   selectAll: 'Seleccionar todas',
   clearAll: 'Quitar todas',
   selectAtLeastOne: 'Selecciona al menos una categoría.',
-  players: 'Jugadores',
   impostors: 'Impostores',
-  playersLabel: (n) => `${n} jugadores`,
+  playersWithCount: (n) => `Jugadores (${n})`,
   impostorsLabel: (n) => (n === 1 ? '1 impostor' : `${n} impostores`),
   impostorsCap: (cap, players) => `Hasta ${cap} para ${players} jugadores.`,
+  playerNamePlaceholder: 'Nombre del jugador',
+  addPlayer: 'Agregar',
+  removePlayer: (name) => `Quitar a ${name}`,
+  needMorePlayers: (min) => `Necesitas al menos ${min} jugadores.`,
+  maxPlayersReached: (max) => `Máximo ${max} jugadores.`,
   startGame: 'Comenzar partida',
   starting: 'Comenzando…',
   poolReset: 'Ya viste todas las palabras de estas categorías, así que el mazo se reinició: a partir de ahora pueden repetirse.',
   decrease: 'disminuir',
   increase: 'aumentar',
-  playerOf: (n, total) => `Jugador ${n} de ${total}`,
-  playerName: (n) => `Jugador ${n}`,
+  whoHasPhone: '¿Quién tiene el teléfono?',
+  passPhoneHint: 'Vayan pasando el teléfono. Cada jugador toca su nombre para ver su palabra.',
   privacyNote: 'Asegúrate de que nadie más vea la pantalla.',
   tapToReveal: 'Toca para revelar',
+  hide: 'Ocultar',
+  startDiscussion: 'Comenzar el debate',
   categoryLabel: (name) => `Categoría: ${name}`,
   youAreImpostor: '🕵️ Eres un impostor',
   yourHint: 'Tu pista:',
   blendIn: 'Mimetízate. Que no descubran que no conoces la palabra.',
   secretWordIs: 'La palabra secreta es:',
   describeCarefully: 'Descríbela sin delatarla: los impostores están escuchando.',
-  hideAndPass: (next) => `Ocultar y pasar al Jugador ${next}`,
-  hideAndDiscuss: 'Ocultar y comenzar el debate',
   discussionTime: 'Hora del debate',
   discussionRules: (impostorCount) =>
     `comienza. Por turnos, cada uno dice una palabra o frase sobre la palabra secreta. Luego voten ${

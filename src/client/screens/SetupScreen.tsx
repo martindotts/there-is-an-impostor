@@ -1,24 +1,35 @@
 import { useEffect, useState } from 'react';
-import type { Category, StartGameRequest } from '../../shared/types';
-import { MAX_PLAYERS, MIN_PLAYERS, maxImpostors } from '../../shared/types';
+import type { Category, Player } from '../../shared/types';
+import { MAX_PLAYERS, MAX_PLAYER_NAME_LENGTH, MIN_PLAYERS, maxImpostors } from '../../shared/types';
+import type { GameConfig } from '../App';
 import { useI18n } from '../i18n';
 
 interface Props {
   categories: Category[];
-  initialConfig: StartGameRequest | null;
-  onStart: (config: StartGameRequest) => void;
+  players: Player[];
+  initialConfig: GameConfig | null;
+  onAddPlayer: (name: string) => Promise<void>;
+  onRemovePlayer: (id: number) => Promise<void>;
+  onStart: (config: GameConfig) => void;
   onBack: () => void;
 }
 
-/** Two-step game setup: 1) categories, 2) players & impostors. */
-export function SetupScreen({ categories, initialConfig, onStart, onBack }: Props) {
+/** Two-step game setup: 1) categories, 2) player roster & impostors. */
+export function SetupScreen({
+  categories,
+  players,
+  initialConfig,
+  onAddPlayer,
+  onRemovePlayer,
+  onStart,
+  onBack,
+}: Props) {
   const { m } = useI18n();
   const [step, setStep] = useState<1 | 2>(1);
   // All categories selected by default.
   const [selected, setSelected] = useState<Set<number>>(
     () => new Set(initialConfig?.categoryIds ?? categories.map((c) => c.id)),
   );
-  const [players, setPlayers] = useState(initialConfig?.playerCount ?? 6);
   const [impostors, setImpostors] = useState(initialConfig?.impostorCount ?? 1);
   const [starting, setStarting] = useState(false);
 
@@ -28,12 +39,13 @@ export function SetupScreen({ categories, initialConfig, onStart, onBack }: Prop
     if (!initialConfig) setSelected(new Set(categories.map((c) => c.id)));
   }, [categories, initialConfig]);
 
-  const impostorCap = maxImpostors(players);
+  const impostorCap = maxImpostors(players.length);
   useEffect(() => {
     if (impostors > impostorCap) setImpostors(impostorCap);
   }, [impostors, impostorCap]);
 
   const allSelected = selected.size === categories.length;
+  const enoughPlayers = players.length >= MIN_PLAYERS;
 
   const toggle = (id: number) => {
     setSelected((prev) => {
@@ -62,9 +74,7 @@ export function SetupScreen({ categories, initialConfig, onStart, onBack }: Prop
           <h1>{m.categories}</h1>
           <section>
             <div className="section-header">
-              <span className="muted small">
-                {m.selectAtLeastOne}
-              </span>
+              <span className="muted small">{m.selectAtLeastOne}</span>
               <button
                 className="link-button"
                 onClick={() =>
@@ -99,15 +109,11 @@ export function SetupScreen({ categories, initialConfig, onStart, onBack }: Prop
       ) : (
         <>
           <h1>{m.playersAndImpostors}</h1>
+
           <section>
-            <h2>{m.players}</h2>
-            <Stepper
-              value={players}
-              min={MIN_PLAYERS}
-              max={MAX_PLAYERS}
-              onChange={setPlayers}
-              label={m.playersLabel(players)}
-            />
+            <h2>{m.playersWithCount(players.length)}</h2>
+            <RosterEditor players={players} onAdd={onAddPlayer} onRemove={onRemovePlayer} />
+            {!enoughPlayers && <p className="muted small">{m.needMorePlayers(MIN_PLAYERS)}</p>}
           </section>
 
           <section>
@@ -119,20 +125,16 @@ export function SetupScreen({ categories, initialConfig, onStart, onBack }: Prop
               onChange={setImpostors}
               label={m.impostorsLabel(impostors)}
             />
-            <p className="muted small">{m.impostorsCap(impostorCap, players)}</p>
+            <p className="muted small">{m.impostorsCap(impostorCap, players.length)}</p>
           </section>
 
           <button
             className="button primary big"
-            disabled={starting}
+            disabled={starting || !enoughPlayers}
             onClick={async () => {
               setStarting(true);
               try {
-                await onStart({
-                  categoryIds: [...selected],
-                  playerCount: players,
-                  impostorCount: impostors,
-                });
+                await onStart({ categoryIds: [...selected], impostorCount: impostors });
               } finally {
                 setStarting(false);
               }
@@ -142,6 +144,76 @@ export function SetupScreen({ categories, initialConfig, onStart, onBack }: Prop
           </button>
         </>
       )}
+    </div>
+  );
+}
+
+function RosterEditor({
+  players,
+  onAdd,
+  onRemove,
+}: {
+  players: Player[];
+  onAdd: (name: string) => Promise<void>;
+  onRemove: (id: number) => Promise<void>;
+}) {
+  const { m } = useI18n();
+  const [name, setName] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const atCap = players.length >= MAX_PLAYERS;
+  const canAdd = name.trim().length > 0 && !atCap && !busy;
+
+  const add = async () => {
+    if (!canAdd) return;
+    setBusy(true);
+    try {
+      await onAdd(name.trim());
+      setName('');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="roster">
+      <ul className="roster-list">
+        {players.map((p) => (
+          <li key={p.id} className="roster-item">
+            <span className="roster-name">{p.name}</span>
+            <button
+              className="roster-remove"
+              aria-label={m.removePlayer(p.name)}
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await onRemove(p.id);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              ✕
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div className="roster-add">
+        <input
+          className="text-input"
+          value={name}
+          maxLength={MAX_PLAYER_NAME_LENGTH}
+          placeholder={m.playerNamePlaceholder}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && add()}
+          disabled={atCap}
+        />
+        <button className="button" disabled={!canAdd} onClick={add}>
+          {m.addPlayer}
+        </button>
+      </div>
+      {atCap && <p className="muted small">{m.maxPlayersReached(MAX_PLAYERS)}</p>}
     </div>
   );
 }

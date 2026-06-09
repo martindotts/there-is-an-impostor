@@ -9,9 +9,7 @@ interface Props {
 
 export function ResultsScreen({ game, onPlayAgain, onNewSetup }: Props) {
   const { m } = useI18n();
-  const impostors = game.impostor
-    .map((isImpostor, i) => (isImpostor ? i + 1 : null))
-    .filter((n): n is number => n !== null);
+  const impostors = game.players.filter((_, i) => game.impostor[i]);
 
   return (
     <div className="centered results">
@@ -21,9 +19,9 @@ export function ResultsScreen({ game, onPlayAgain, onNewSetup }: Props) {
       <h2 className="secret">{game.round.word}</h2>
       <p className="muted">{m.hintWas(game.round.hint)}</p>
       <div className="impostor-list">
-        {impostors.map((n) => (
-          <div key={n} className="impostor-tag">
-            🕵️ {m.playerName(n)}
+        {impostors.map((name, i) => (
+          <div key={i} className="impostor-tag">
+            🕵️ {name}
           </div>
         ))}
       </div>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Category, SessionUser, StartGameRequest } from '../shared/types';
+import type { Category, Player, SessionUser } from '../shared/types';
 import { api } from './api';
 import type { ActiveGame } from './game';
 import { buildGame } from './game';
@@ -20,12 +20,18 @@ type Screen =
   | { name: 'discussion'; game: ActiveGame }
   | { name: 'results'; game: ActiveGame };
 
+export interface GameConfig {
+  categoryIds: number[];
+  impostorCount: number;
+}
+
 export function App() {
   const { locale, m } = useI18n();
   const [user, setUser] = useState<SessionUser | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [screen, setScreen] = useState<Screen>({ name: 'loading' });
-  const [lastConfig, setLastConfig] = useState<StartGameRequest | null>(null);
+  const [lastConfig, setLastConfig] = useState<GameConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -43,37 +49,59 @@ export function App() {
   }, []);
 
   // Categories are localized server-side, so refetch when the language changes.
+  // The roster only depends on locale for the very first seed.
   useEffect(() => {
     if (!user) return;
-    api
-      .categories(locale)
-      .then(({ categories }) => setCategories(categories))
+    Promise.all([api.categories(locale), api.players(locale)])
+      .then(([{ categories }, { players }]) => {
+        setCategories(categories);
+        setPlayers(players);
+      })
       .catch((err: Error) => setError(err.message));
   }, [user, locale]);
 
+  const addPlayer = useCallback(async (name: string) => {
+    const { player } = await api.addPlayer(name);
+    setPlayers((prev) => [...prev, player]);
+  }, []);
+
+  const removePlayer = useCallback(async (id: number) => {
+    await api.removePlayer(id);
+    setPlayers((prev) => prev.filter((p) => p.id !== id));
+  }, []);
+
   const startGame = useCallback(
-    async (config: StartGameRequest) => {
+    async (config: GameConfig) => {
       setError(null);
       setNotice(null);
       try {
-        const localized = { ...config, locale };
-        const { round, poolReset } = await api.startGame(localized);
-        setLastConfig(localized);
+        const { round, poolReset } = await api.startGame({
+          ...config,
+          playerCount: players.length,
+          locale,
+        });
+        setLastConfig(config);
         if (poolReset) setNotice(m.poolReset);
         setScreen({
           name: 'reveal',
-          game: buildGame(round, config.playerCount, config.impostorCount),
+          game: buildGame(
+            round,
+            players.map((p) => p.name),
+            config.impostorCount,
+          ),
         });
       } catch (err) {
         setError((err as Error).message);
       }
     },
-    [locale, m],
+    [locale, m, players],
   );
 
   const logout = useCallback(async () => {
     await api.logout();
     setUser(null);
+    setPlayers([]);
+    setLastConfig(null);
     setScreen({ name: 'login' });
   }, []);
 
@@ -93,7 +121,10 @@ export function App() {
       {screen.name === 'setup' && (
         <SetupScreen
           categories={categories}
+          players={players}
           initialConfig={lastConfig}
+          onAddPlayer={addPlayer}
+          onRemovePlayer={removePlayer}
           onStart={startGame}
           onBack={() => setScreen({ name: 'home' })}
         />

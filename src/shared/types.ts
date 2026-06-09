@@ -8,6 +8,13 @@ export interface SessionUser {
   picture: string | null;
 }
 
+export interface Player {
+  id: number;
+  name: string;
+}
+
+export const MAX_PLAYER_NAME_LENGTH = 30;
+
 export interface Category {
   id: number;
   slug: string;

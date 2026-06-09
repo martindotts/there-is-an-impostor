@@ -1,5 +1,6 @@
 import type {
   Category,
+  Player,
   Providers,
   SessionUser,
   StartGameRequest,
@@ -26,6 +27,16 @@ export const api = {
   providers: () => request<Providers>('/api/providers'),
   categories: (locale: string) =>
     request<{ categories: Category[] }>(`/api/categories?locale=${encodeURIComponent(locale)}`),
+  players: (locale: string) =>
+    request<{ players: Player[] }>(`/api/players?locale=${encodeURIComponent(locale)}`),
+  addPlayer: (name: string) =>
+    request<{ player: Player }>('/api/players', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    }),
+  removePlayer: (id: number) =>
+    request<{ ok: boolean }>(`/api/players/${id}`, { method: 'DELETE' }),
   startGame: (body: StartGameRequest) =>
     request<StartGameResponse>('/api/game/start', {
       method: 'POST',

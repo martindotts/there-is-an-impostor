@@ -2,12 +2,18 @@ import { Hono } from 'hono';
 import type {
   Category,
   GameRound,
+  Player,
   Providers,
   StartGameRequest,
   StartGameResponse,
 } from '../shared/types';
-import { MAX_PLAYERS, MIN_PLAYERS, maxImpostors } from '../shared/types';
-import { DEFAULT_LOCALE, isLocale, type Locale } from '../shared/i18n';
+import {
+  MAX_PLAYERS,
+  MAX_PLAYER_NAME_LENGTH,
+  MIN_PLAYERS,
+  maxImpostors,
+} from '../shared/types';
+import { DEFAULT_LOCALE, defaultPlayerName, isLocale, type Locale } from '../shared/i18n';
 import type { AppContext } from './types';
 import { getSessionUser } from './session';
 
@@ -58,6 +64,80 @@ apiRoutes.get('/categories', async (c) => {
     .bind(locale, DEFAULT_LOCALE)
     .all<Category>();
   return c.json({ categories: results });
+});
+
+// ---------------------------------------------------------------------------
+// Player roster (saved per account, reused across games)
+// ---------------------------------------------------------------------------
+
+const listPlayers = (db: D1Database, userId: number) =>
+  db
+    .prepare('SELECT id, name FROM players WHERE user_id = ?1 ORDER BY id')
+    .bind(userId)
+    .all<Player>();
+
+apiRoutes.get('/players', async (c) => {
+  const user = c.get('user');
+  let { results } = await listPlayers(c.env.DB, user.id);
+
+  if (results.length === 0) {
+    // First time only: seed 3 default players in the caller's language. If the
+    // user later empties their roster on purpose, we don't seed again. The
+    // seeded-flag check lives inside each INSERT and the batch runs as a
+    // single transaction, so concurrent first fetches can't double-seed.
+    const locale = parseLocale(c.req.query('locale'));
+    const seedInsert = c.env.DB.prepare(
+      `INSERT INTO players (user_id, name)
+       SELECT ?1, ?2 WHERE (SELECT players_seeded FROM users WHERE id = ?1) = 0`,
+    );
+    await c.env.DB.batch([
+      seedInsert.bind(user.id, defaultPlayerName(locale, 1)),
+      seedInsert.bind(user.id, defaultPlayerName(locale, 2)),
+      seedInsert.bind(user.id, defaultPlayerName(locale, 3)),
+      c.env.DB.prepare('UPDATE users SET players_seeded = 1 WHERE id = ?1').bind(user.id),
+    ]);
+    ({ results } = await listPlayers(c.env.DB, user.id));
+  }
+
+  return c.json({ players: results });
+});
+
+apiRoutes.post('/players', async (c) => {
+  const user = c.get('user');
+  let body: { name?: unknown };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'invalid JSON body' }, 400);
+  }
+  const name = typeof body.name === 'string' ? body.name.trim() : '';
+  if (name.length === 0 || name.length > MAX_PLAYER_NAME_LENGTH) {
+    return c.json({ error: `name must be 1-${MAX_PLAYER_NAME_LENGTH} characters` }, 400);
+  }
+
+  const count = await c.env.DB.prepare('SELECT COUNT(*) AS n FROM players WHERE user_id = ?1')
+    .bind(user.id)
+    .first<{ n: number }>();
+  if ((count?.n ?? 0) >= MAX_PLAYERS) {
+    return c.json({ error: `a roster can have at most ${MAX_PLAYERS} players` }, 400);
+  }
+
+  const player = await c.env.DB.prepare(
+    'INSERT INTO players (user_id, name) VALUES (?1, ?2) RETURNING id, name',
+  )
+    .bind(user.id, name)
+    .first<Player>();
+  return c.json({ player });
+});
+
+apiRoutes.delete('/players/:id', async (c) => {
+  const user = c.get('user');
+  const id = Number(c.req.param('id'));
+  if (!Number.isInteger(id)) return c.json({ error: 'invalid player id' }, 400);
+  await c.env.DB.prepare('DELETE FROM players WHERE id = ?1 AND user_id = ?2')
+    .bind(id, user.id)
+    .run();
+  return c.json({ ok: true });
 });
 
 apiRoutes.post('/game/start', async (c) => {

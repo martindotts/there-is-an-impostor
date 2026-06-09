@@ -15,7 +15,7 @@ export function DiscussionScreen({ game, onReveal }: Props) {
       <h1>{m.discussionTime}</h1>
       <p className="muted">{m.categoryLabel(game.round.category)}</p>
       <p>
-        <strong>{m.playerName(game.startingPlayer)}</strong> {m.discussionRules(impostorCount)}
+        <strong>{game.players[game.startingPlayer]}</strong> {m.discussionRules(impostorCount)}
       </p>
       <p className="muted small">{m.impostorsHiding(impostorCount)}</p>
       <button className="button primary big" onClick={onReveal}>

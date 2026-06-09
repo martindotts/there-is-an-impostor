@@ -2,23 +2,26 @@ import type { GameRound } from '../shared/types';
 
 export interface ActiveGame {
   round: GameRound;
-  /** impostor[i] is true when player i+1 is an impostor. */
+  /** Player names, in roster order. */
+  players: string[];
+  /** impostor[i] is true when players[i] is an impostor. */
   impostor: boolean[];
-  /** 1-based player number that opens the discussion. */
+  /** Index into players of who opens the discussion. */
   startingPlayer: number;
 }
 
-export function buildGame(round: GameRound, playerCount: number, impostorCount: number): ActiveGame {
-  const indices = Array.from({ length: playerCount }, (_, i) => i);
+export function buildGame(round: GameRound, players: string[], impostorCount: number): ActiveGame {
+  const indices = Array.from({ length: players.length }, (_, i) => i);
   for (let i = indices.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [indices[i], indices[j]] = [indices[j], indices[i]];
   }
-  const impostor = new Array<boolean>(playerCount).fill(false);
+  const impostor = new Array<boolean>(players.length).fill(false);
   for (const idx of indices.slice(0, impostorCount)) impostor[idx] = true;
   return {
     round,
+    players,
     impostor,
-    startingPlayer: 1 + Math.floor(Math.random() * playerCount),
+    startingPlayer: Math.floor(Math.random() * players.length),
   };
 }

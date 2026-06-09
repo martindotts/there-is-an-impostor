@@ -17,15 +17,19 @@ the frontend (React + Vite SPA served as Worker static assets). Data lives in Cl
 - **No repeats per user**: the server remembers which words each user has played (across
   languages) and never deals one twice. When a user exhausts the selected categories, their
   history for those categories resets automatically and the app shows a notice.
+- **Saved player roster**: player names are stored per account (seeded once with three localized
+  defaults) and can be added/removed before each game. During the reveal there is no fixed
+  order — each player taps their own name on a list when the phone reaches them.
 
 ## How a round works
 
 1. The host signs in and taps **New game** on the home screen, then sets up the round in two
-   steps: categories first, then player and impostor counts. The profile button on the home
-   screen opens a modal to switch language or sign out.
+   steps: categories first, then the player roster (add/remove names, saved for next time) and
+   the impostor count. The profile button on the home screen opens a modal to switch language
+   or sign out.
 2. The server picks a random word (+ hint) from the selected categories.
-3. The phone is passed around: each player privately reveals their word — impostors see the hint
-   instead.
+3. The phone is passed around in any order: each player taps their own name on the list and
+   privately reveals their word — impostors see the hint instead.
 4. Discussion: starting with a random player, everyone says one word about the secret word, then
    the group votes. Finally the app reveals the impostors and the word.
 
@@ -108,6 +112,8 @@ requires HTTPS return URLs, so Apple login can't be tested on plain `http://loca
 | `GET /api/providers` | Which login providers are configured |
 | `GET /api/me` | Current session user |
 | `GET /api/categories?locale=es` | Localized categories with word counts (auth required) |
+| `GET /api/players?locale=es` | Saved roster; seeds 3 localized defaults on first call (auth required) |
+| `POST /api/players`, `DELETE /api/players/:id` | Add / remove a roster player (auth required) |
 | `POST /api/game/start` | `{ categoryIds, playerCount, impostorCount, locale }` → `{ round: { word, hint, category }, poolReset }` (auth required) |
 
 ## Adding words

@@ -353,6 +353,97 @@ h2 {
   font-size: 1.2rem;
 }
 
+/* ----- player roster ----- */
+
+.roster-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roster-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+}
+
+.roster-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roster-remove {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.roster-remove:hover {
+  color: var(--accent);
+}
+
+.roster-add {
+  display: flex;
+  gap: 8px;
+}
+
+.text-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 12px 14px;
+  font-size: 1rem;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* ----- reveal name list ----- */
+
+.reveal-list {
+  display: flex;
+  flex-direction: column;
+  padding-top: 12px;
+}
+
+.name-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.name-list .name-button {
+  width: 100%;
+  justify-content: space-between;
+  font-size: 1.05rem;
+  padding: 14px 18px;
+}
+
+.name-button.seen {
+  opacity: 0.5;
+}
+
+/* ----- stepper ----- */
+
 .stepper {
   display: flex;
   align-items: center;

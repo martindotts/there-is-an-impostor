@@ -8,22 +8,51 @@ interface Props {
 }
 
 /**
- * Pass-the-phone reveal: each player in turn taps to see their word (or the
- * impostor hint), hides it again, and hands the phone to the next player.
+ * Pass-the-phone reveal, in no particular order: the screen lists every
+ * player; whoever holds the phone taps their own name, sees their word (or
+ * the impostor hint), hides it, and passes the phone on. Once everyone has
+ * looked, the discussion can start.
  */
 export function RevealScreen({ game, onDone }: Props) {
   const { m } = useI18n();
-  const [player, setPlayer] = useState(1); // 1-based
+  const [revealed, setRevealed] = useState<boolean[]>(() => game.players.map(() => false));
+  const [current, setCurrent] = useState<number | null>(null);
   const [shown, setShown] = useState(false);
 
-  const total = game.impostor.length;
-  const isImpostor = game.impostor[player - 1];
+  const allRevealed = revealed.every(Boolean);
 
+  // Name list: whoever holds the phone picks themselves.
+  if (current === null) {
+    return (
+      <div className="reveal-list">
+        <h1>{m.whoHasPhone}</h1>
+        <p className="muted">{m.passPhoneHint}</p>
+        <ul className="name-list">
+          {game.players.map((name, i) => (
+            <li key={i}>
+              <button
+                className={`button name-button ${revealed[i] ? 'seen' : ''}`}
+                disabled={revealed[i]}
+                onClick={() => setCurrent(i)}
+              >
+                <span className="roster-name">{name}</span>
+                {revealed[i] && <span aria-hidden="true">✓</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <button className="button primary big" disabled={!allRevealed} onClick={onDone}>
+          {m.startDiscussion}
+        </button>
+      </div>
+    );
+  }
+
+  // Privacy gate before showing anything.
   if (!shown) {
     return (
       <div className="centered reveal">
-        <p className="muted">{m.playerOf(player, total)}</p>
-        <h1>{m.playerName(player)}</h1>
+        <h1>{game.players[current]}</h1>
         <p className="muted">{m.privacyNote}</p>
         <button className="button primary big" onClick={() => setShown(true)}>
           {m.tapToReveal}
@@ -32,6 +61,7 @@ export function RevealScreen({ game, onDone }: Props) {
     );
   }
 
+  const isImpostor = game.impostor[current];
   return (
     <div className={`centered reveal ${isImpostor ? 'impostor' : ''}`}>
       <p className="muted">{m.categoryLabel(game.round.category)}</p>
@@ -52,12 +82,12 @@ export function RevealScreen({ game, onDone }: Props) {
       <button
         className="button primary big"
         onClick={() => {
+          setRevealed((prev) => prev.map((r, i) => (i === current ? true : r)));
+          setCurrent(null);
           setShown(false);
-          if (player === total) onDone();
-          else setPlayer(player + 1);
         }}
       >
-        {player === total ? m.hideAndDiscuss : m.hideAndPass(player + 1)}
+        {m.hide}
       </button>
     </div>
   );
