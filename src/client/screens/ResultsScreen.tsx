@@ -15,9 +15,13 @@ export function ResultsScreen({ game, onPlayAgain, onNewSetup }: Props) {
     <div className="centered results">
       <div className="logo">🎭</div>
       <h1>{m.theReveal}</h1>
-      <p className="muted">{m.secretWordWas}</p>
-      <h2 className="secret">{game.round.word}</h2>
-      <p className="muted">{m.hintWas(game.round.hint)}</p>
+      {game.round && (
+        <>
+          <p className="muted">{m.secretWordWas}</p>
+          <h2 className="secret">{game.round.word}</h2>
+          <p className="muted">{m.hintWas(game.round.hint)}</p>
+        </>
+      )}
       <div className="impostor-list">
         {impostors.map((name, i) => (
           <div key={i} className="impostor-tag">

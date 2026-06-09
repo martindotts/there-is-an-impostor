@@ -38,7 +38,7 @@ export interface Messages {
   needMorePlayers: (min: number) => string;
   maxPlayersReached: (max: number) => string;
   startGame: string;
-  starting: string;
+  pickingWord: string;
   poolReset: string;
   decrease: string;
   increase: string;
@@ -94,7 +94,7 @@ const en: Messages = {
   needMorePlayers: (min) => `You need at least ${min} players.`,
   maxPlayersReached: (max) => `Maximum ${max} players.`,
   startGame: 'Start game',
-  starting: 'Starting…',
+  pickingWord: 'Picking a word…',
   poolReset: "You've seen every word in these categories, so the deck was reshuffled — words may repeat from now on.",
   decrease: 'decrease',
   increase: 'increase',
@@ -154,7 +154,7 @@ const es: Messages = {
   needMorePlayers: (min) => `Necesitas al menos ${min} jugadores.`,
   maxPlayersReached: (max) => `Máximo ${max} jugadores.`,
   startGame: 'Comenzar partida',
-  starting: 'Comenzando…',
+  pickingWord: 'Eligiendo una palabra…',
   poolReset: 'Ya viste todas las palabras de estas categorías, así que el mazo se reinició: a partir de ahora pueden repetirse.',
   decrease: 'disminuir',
   increase: 'aumentar',

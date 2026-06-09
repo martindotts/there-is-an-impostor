@@ -1,14 +1,24 @@
 import { useEffect, useState } from 'react';
 import type { Providers } from '../../shared/types';
 import { api } from '../api';
+import { readCache, writeCache } from '../cache';
 import { LocaleSwitcher, useI18n } from '../i18n';
 
 export function LoginScreen() {
   const { m } = useI18n();
-  const [providers, setProviders] = useState<Providers | null>(null);
+  // Render the last known provider set immediately; revalidate in background.
+  const [providers, setProviders] = useState<Providers | null>(() =>
+    readCache<Providers>('providers'),
+  );
 
   useEffect(() => {
-    api.providers().then(setProviders).catch(() => setProviders(null));
+    api
+      .providers()
+      .then((fresh) => {
+        setProviders(fresh);
+        writeCache('providers', fresh);
+      })
+      .catch(() => {});
   }, []);
 
   return (

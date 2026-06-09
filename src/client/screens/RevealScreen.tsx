@@ -61,6 +61,17 @@ export function RevealScreen({ game, onDone }: Props) {
     );
   }
 
+  // The game starts before the server answers with the word; in the rare case
+  // a player gets here first, show a brief loading card until it arrives.
+  if (!game.round) {
+    return (
+      <div className="centered reveal">
+        <h1>{game.players[current]}</h1>
+        <p className="muted pulse">{m.pickingWord}</p>
+      </div>
+    );
+  }
+
   const isImpostor = game.impostor[current];
   return (
     <div className={`centered reveal ${isImpostor ? 'impostor' : ''}`}>

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Category, Player, SessionUser } from '../shared/types';
 import { api } from './api';
+import { clearCache, readCache, writeCache } from './cache';
 import type { ActiveGame } from './game';
 import { buildGame } from './game';
 import { useI18n } from './i18n';
@@ -27,78 +28,155 @@ export interface GameConfig {
 
 export function App() {
   const { locale, m } = useI18n();
-  const [user, setUser] = useState<SessionUser | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [screen, setScreen] = useState<Screen>({ name: 'loading' });
+  // Paint instantly from the cached session; api.me() revalidates below.
+  const [user, setUser] = useState<SessionUser | null>(() => readCache<SessionUser>('user'));
+  const [categories, setCategories] = useState<Category[]>(
+    () => readCache<Category[]>(`categories:${locale}`) ?? [],
+  );
+  const [players, setPlayers] = useState<Player[]>(() => readCache<Player[]>('players') ?? []);
+  const [screen, setScreen] = useState<Screen>(() =>
+    readCache<SessionUser>('user') ? { name: 'home' } : { name: 'loading' },
+  );
   const [lastConfig, setLastConfig] = useState<GameConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  // Optimistic adds in flight: temp (negative) id → whether the user already
+  // removed the player again before the server confirmed the add.
+  const pendingAdds = useRef(new Map<number, { cancelled: boolean }>());
+  const nextTempId = useRef(-1);
 
   useEffect(() => {
     api
       .me()
       .then(({ user }) => {
         setUser(user);
-        setScreen(user ? { name: 'home' } : { name: 'login' });
+        if (user) {
+          writeCache('user', user);
+          setScreen((prev) => (prev.name === 'loading' ? { name: 'home' } : prev));
+        } else {
+          clearCache();
+          // Don't interrupt a running game; the session only matters again
+          // on the next server interaction.
+          setScreen((prev) =>
+            prev.name === 'loading' || prev.name === 'home' || prev.name === 'setup'
+              ? { name: 'login' }
+              : prev,
+          );
+        }
       })
       .catch((err: Error) => {
         setError(err.message);
-        setScreen({ name: 'login' });
+        setScreen((prev) => (prev.name === 'loading' ? { name: 'login' } : prev));
       });
   }, []);
 
-  // Categories are localized server-side, so refetch when the language changes.
-  // The roster only depends on locale for the very first seed.
+  // Categories are localized server-side: render the cached list for this
+  // locale immediately, then revalidate.
   useEffect(() => {
     if (!user) return;
-    Promise.all([api.categories(locale), api.players(locale)])
-      .then(([{ categories }, { players }]) => {
+    const cached = readCache<Category[]>(`categories:${locale}`);
+    if (cached) setCategories(cached);
+    api
+      .categories(locale)
+      .then(({ categories }) => {
         setCategories(categories);
-        setPlayers(players);
+        writeCache(`categories:${locale}`, categories);
       })
       .catch((err: Error) => setError(err.message));
   }, [user, locale]);
 
-  const addPlayer = useCallback(async (name: string) => {
-    const { player } = await api.addPlayer(name);
-    setPlayers((prev) => [...prev, player]);
+  // Roster: revalidate once per session (skip if optimistic edits are in
+  // flight — they are already the freshest truth).
+  useEffect(() => {
+    if (!user) return;
+    api
+      .players(locale)
+      .then(({ players }) => {
+        if (pendingAdds.current.size === 0) setPlayers(players);
+      })
+      .catch((err: Error) => setError(err.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Keep the roster cache in sync with confirmed players.
+  useEffect(() => {
+    if (user) writeCache('players', players.filter((p) => p.id > 0));
+  }, [user, players]);
+
+  const addPlayer = useCallback((name: string) => {
+    const tempId = nextTempId.current--;
+    pendingAdds.current.set(tempId, { cancelled: false });
+    setPlayers((prev) => [...prev, { id: tempId, name }]);
+    api
+      .addPlayer(name)
+      .then(({ player }) => {
+        const pending = pendingAdds.current.get(tempId);
+        pendingAdds.current.delete(tempId);
+        if (pending?.cancelled) {
+          // Removed again before the server confirmed: delete it server-side.
+          api.removePlayer(player.id).catch(() => {});
+          return;
+        }
+        setPlayers((prev) => prev.map((p) => (p.id === tempId ? player : p)));
+      })
+      .catch((err: Error) => {
+        pendingAdds.current.delete(tempId);
+        setPlayers((prev) => prev.filter((p) => p.id !== tempId));
+        setError(err.message);
+      });
   }, []);
 
-  const removePlayer = useCallback(async (id: number) => {
-    await api.removePlayer(id);
-    setPlayers((prev) => prev.filter((p) => p.id !== id));
+  const removePlayer = useCallback((id: number) => {
+    let removed: Player | undefined;
+    setPlayers((prev) => {
+      removed = prev.find((p) => p.id === id);
+      return prev.filter((p) => p.id !== id);
+    });
+    if (id < 0) {
+      const pending = pendingAdds.current.get(id);
+      if (pending) pending.cancelled = true;
+      return;
+    }
+    api.removePlayer(id).catch((err: Error) => {
+      if (removed) setPlayers((prev) => [...prev, removed!]);
+      setError(err.message);
+    });
   }, []);
 
   const startGame = useCallback(
-    async (config: GameConfig) => {
+    (config: GameConfig) => {
       setError(null);
       setNotice(null);
-      try {
-        const { round, poolReset } = await api.startGame({
-          ...config,
-          playerCount: players.length,
-          locale,
+      setLastConfig(config);
+      // Navigate immediately; roles are assigned client-side and the word is
+      // attached to the game as soon as the server answers.
+      setScreen({
+        name: 'reveal',
+        game: buildGame(
+          players.map((p) => p.name),
+          config.impostorCount,
+        ),
+      });
+      api
+        .startGame({ ...config, playerCount: players.length, locale })
+        .then(({ round, poolReset }) => {
+          if (poolReset) setNotice(m.poolReset);
+          setScreen((prev) =>
+            'game' in prev ? { ...prev, game: { ...prev.game, round } } : prev,
+          );
+        })
+        .catch((err: Error) => {
+          setError(err.message);
+          setScreen((prev) => (prev.name === 'reveal' ? { name: 'setup' } : prev));
         });
-        setLastConfig(config);
-        if (poolReset) setNotice(m.poolReset);
-        setScreen({
-          name: 'reveal',
-          game: buildGame(
-            round,
-            players.map((p) => p.name),
-            config.impostorCount,
-          ),
-        });
-      } catch (err) {
-        setError((err as Error).message);
-      }
     },
     [locale, m, players],
   );
 
-  const logout = useCallback(async () => {
-    await api.logout();
+  const logout = useCallback(() => {
+    api.logout().catch(() => {});
+    clearCache();
     setUser(null);
     setPlayers([]);
     setLastConfig(null);

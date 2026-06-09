@@ -13,7 +13,7 @@ export function DiscussionScreen({ game, onReveal }: Props) {
     <div className="centered discussion">
       <div className="logo">🗣️</div>
       <h1>{m.discussionTime}</h1>
-      <p className="muted">{m.categoryLabel(game.round.category)}</p>
+      {game.round && <p className="muted">{m.categoryLabel(game.round.category)}</p>}
       <p>
         <strong>{game.players[game.startingPlayer]}</strong> {m.discussionRules(impostorCount)}
       </p>

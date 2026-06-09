@@ -8,8 +8,8 @@ interface Props {
   categories: Category[];
   players: Player[];
   initialConfig: GameConfig | null;
-  onAddPlayer: (name: string) => Promise<void>;
-  onRemovePlayer: (id: number) => Promise<void>;
+  onAddPlayer: (name: string) => void;
+  onRemovePlayer: (id: number) => void;
   onStart: (config: GameConfig) => void;
   onBack: () => void;
 }
@@ -31,7 +31,6 @@ export function SetupScreen({
     () => new Set(initialConfig?.categoryIds ?? categories.map((c) => c.id)),
   );
   const [impostors, setImpostors] = useState(initialConfig?.impostorCount ?? 1);
-  const [starting, setStarting] = useState(false);
 
   // The category list can arrive (or change) after mount; default to all selected
   // unless the user is restoring a previous config.
@@ -130,17 +129,10 @@ export function SetupScreen({
 
           <button
             className="button primary big"
-            disabled={starting || !enoughPlayers}
-            onClick={async () => {
-              setStarting(true);
-              try {
-                await onStart({ categoryIds: [...selected], impostorCount: impostors });
-              } finally {
-                setStarting(false);
-              }
-            }}
+            disabled={!enoughPlayers}
+            onClick={() => onStart({ categoryIds: [...selected], impostorCount: impostors })}
           >
-            {starting ? m.starting : m.startGame}
+            {m.startGame}
           </button>
         </>
       )}
@@ -154,25 +146,19 @@ function RosterEditor({
   onRemove,
 }: {
   players: Player[];
-  onAdd: (name: string) => Promise<void>;
-  onRemove: (id: number) => Promise<void>;
+  onAdd: (name: string) => void;
+  onRemove: (id: number) => void;
 }) {
   const { m } = useI18n();
   const [name, setName] = useState('');
-  const [busy, setBusy] = useState(false);
 
   const atCap = players.length >= MAX_PLAYERS;
-  const canAdd = name.trim().length > 0 && !atCap && !busy;
+  const canAdd = name.trim().length > 0 && !atCap;
 
-  const add = async () => {
+  const add = () => {
     if (!canAdd) return;
-    setBusy(true);
-    try {
-      await onAdd(name.trim());
-      setName('');
-    } finally {
-      setBusy(false);
-    }
+    onAdd(name.trim());
+    setName('');
   };
 
   return (
@@ -184,15 +170,7 @@ function RosterEditor({
             <button
               className="roster-remove"
               aria-label={m.removePlayer(p.name)}
-              disabled={busy}
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  await onRemove(p.id);
-                } finally {
-                  setBusy(false);
-                }
-              }}
+              onClick={() => onRemove(p.id)}
             >
               ✕
             </button>

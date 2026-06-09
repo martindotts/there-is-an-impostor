@@ -20,6 +20,9 @@ the frontend (React + Vite SPA served as Worker static assets). Data lives in Cl
 - **Saved player roster**: player names are stored per account (seeded once with three localized
   defaults) and can be added/removed before each game. During the reveal there is no fixed
   order — each player taps their own name on a list when the phone reaches them.
+- **Optimistic UI**: roster edits, game start, and sign-out apply instantly and sync (or roll
+  back) in the background; session, categories, roster, and providers render from a local cache
+  and revalidate silently, so navigation never waits on the network.
 
 ## How a round works
 
