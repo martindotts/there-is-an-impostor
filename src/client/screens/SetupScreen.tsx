@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import type { Category, Player } from '../../shared/types';
 import { MAX_PLAYERS, MAX_PLAYER_NAME_LENGTH, MIN_PLAYERS, maxImpostors } from '../../shared/types';
 import type { GameConfig } from '../App';
+import { readPref, writePref } from '../cache';
 import { useI18n } from '../i18n';
+
+const CATEGORIES_PREF = 'categories';
 
 interface Props {
   categories: Category[];
@@ -26,17 +29,31 @@ export function SetupScreen({
 }: Props) {
   const { m } = useI18n();
   const [step, setStep] = useState<1 | 2>(1);
-  // All categories selected by default.
-  const [selected, setSelected] = useState<Set<number>>(
-    () => new Set(initialConfig?.categoryIds ?? categories.map((c) => c.id)),
-  );
+  // Restore the last selection (kept in localStorage, device-local only);
+  // fall back to all categories selected.
+  const [selected, setSelected] = useState<Set<number>>(() => {
+    const stored = initialConfig?.categoryIds ?? readPref<number[]>(CATEGORIES_PREF);
+    return new Set(stored?.length ? stored : categories.map((c) => c.id));
+  });
   const [impostors, setImpostors] = useState(initialConfig?.impostorCount ?? 1);
 
-  // The category list can arrive (or change) after mount; default to all selected
-  // unless the user is restoring a previous config.
+  // The category list can arrive (or change) after mount: drop selected ids
+  // that no longer exist, and default to all if nothing valid remains.
   useEffect(() => {
-    if (!initialConfig) setSelected(new Set(categories.map((c) => c.id)));
-  }, [categories, initialConfig]);
+    if (categories.length === 0) return;
+    setSelected((prev) => {
+      const valid = new Set(categories.map((c) => c.id));
+      const kept = [...prev].filter((id) => valid.has(id));
+      if (kept.length === prev.size && kept.length > 0) return prev;
+      return new Set(kept.length > 0 ? kept : categories.map((c) => c.id));
+    });
+  }, [categories]);
+
+  // Remember the selection for next time (only meaningful selections — an
+  // empty set just means "default to all" on the next visit).
+  useEffect(() => {
+    if (selected.size > 0) writePref(CATEGORIES_PREF, [...selected]);
+  }, [selected]);
 
   const impostorCap = maxImpostors(players.length);
   useEffect(() => {

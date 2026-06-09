@@ -29,3 +29,25 @@ export function clearCache(): void {
     // ignore
   }
 }
+
+// Device preferences (like the locale) live under their own prefix so
+// clearCache() on sign-out does not wipe them.
+
+const PREF_PREFIX = 'imposter:pref:';
+
+export function readPref<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(PREF_PREFIX + key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function writePref(key: string, value: unknown): void {
+  try {
+    localStorage.setItem(PREF_PREFIX + key, JSON.stringify(value));
+  } catch {
+    // best-effort
+  }
+}
