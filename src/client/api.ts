@@ -24,7 +24,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   me: () => request<{ user: SessionUser | null }>('/api/me'),
   providers: () => request<Providers>('/api/providers'),
-  categories: () => request<{ categories: Category[] }>('/api/categories'),
+  categories: (locale: string) =>
+    request<{ categories: Category[] }>(`/api/categories?locale=${encodeURIComponent(locale)}`),
   startGame: (body: StartGameRequest) =>
     request<{ round: GameRound }>('/api/game/start', {
       method: 'POST',

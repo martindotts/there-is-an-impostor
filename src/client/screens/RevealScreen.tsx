@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ActiveGame } from '../game';
+import { useI18n } from '../i18n';
 
 interface Props {
   game: ActiveGame;
@@ -11,6 +12,7 @@ interface Props {
  * impostor hint), hides it again, and hands the phone to the next player.
  */
 export function RevealScreen({ game, onDone }: Props) {
+  const { m } = useI18n();
   const [player, setPlayer] = useState(1); // 1-based
   const [shown, setShown] = useState(false);
 
@@ -20,13 +22,11 @@ export function RevealScreen({ game, onDone }: Props) {
   if (!shown) {
     return (
       <div className="centered reveal">
-        <p className="muted">
-          Player {player} of {total}
-        </p>
-        <h1>Player {player}</h1>
-        <p className="muted">Make sure nobody else can see the screen.</p>
+        <p className="muted">{m.playerOf(player, total)}</p>
+        <h1>{m.playerName(player)}</h1>
+        <p className="muted">{m.privacyNote}</p>
         <button className="button primary big" onClick={() => setShown(true)}>
-          Tap to reveal
+          {m.tapToReveal}
         </button>
       </div>
     );
@@ -34,19 +34,19 @@ export function RevealScreen({ game, onDone }: Props) {
 
   return (
     <div className={`centered reveal ${isImpostor ? 'impostor' : ''}`}>
-      <p className="muted">Category: {game.round.category}</p>
+      <p className="muted">{m.categoryLabel(game.round.category)}</p>
       {isImpostor ? (
         <>
-          <div className="role-badge">🕵️ You are an impostor</div>
-          <p className="muted">Your hint:</p>
+          <div className="role-badge">{m.youAreImpostor}</div>
+          <p className="muted">{m.yourHint}</p>
           <h1 className="secret">“{game.round.hint}”</h1>
-          <p className="muted small">Blend in. Don't let them figure out you don't know the word.</p>
+          <p className="muted small">{m.blendIn}</p>
         </>
       ) : (
         <>
-          <p className="muted">The secret word is:</p>
+          <p className="muted">{m.secretWordIs}</p>
           <h1 className="secret">{game.round.word}</h1>
-          <p className="muted small">Describe it without giving it away — impostors are listening.</p>
+          <p className="muted small">{m.describeCarefully}</p>
         </>
       )}
       <button
@@ -57,7 +57,7 @@ export function RevealScreen({ game, onDone }: Props) {
           else setPlayer(player + 1);
         }}
       >
-        {player === total ? 'Hide & start discussion' : `Hide & pass to Player ${player + 1}`}
+        {player === total ? m.hideAndDiscuss : m.hideAndPass(player + 1)}
       </button>
     </div>
   );

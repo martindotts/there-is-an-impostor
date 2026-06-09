@@ -26,7 +26,16 @@
       "Bash(curl -s -i -b /tmp/imposter-cookies.txt -X POST http://localhost:5173/auth/logout)",
       "Bash(curl -s -b /tmp/imposter-cookies.txt -c /tmp/imposter-cookies.txt -X POST http://localhost:5173/auth/logout)",
       "PowerShell(git init)",
-      "PowerShell(git add -A)"
+      "PowerShell(git add -A)",
+      "PowerShell(fnm env --shell power-shell | Out-String | Invoke-Expression; Remove-Item -Recurse -Force .wrangler\\\\state; npx wrangler d1 migrations apply imposter-db --local; npm run check)",
+      "Bash(curl -s -o /dev/null http://localhost:5173/api/providers)",
+      "Bash(break)",
+      "Bash(curl -s -c /tmp/imposter-cookies.txt \"http://localhost:5173/auth/dev?name=Martin\" -o /dev/null)",
+      "Bash(curl -s -b /tmp/imposter-cookies.txt \"http://localhost:5173/api/categories?locale=es\")",
+      "Bash(curl -s -b /tmp/imposter-cookies.txt \"http://localhost:5173/api/categories?locale=en\")",
+      "Bash(curl -s -i -c /tmp/imposter-cookies.txt \"http://localhost:5173/auth/dev?name=Martin\")",
+      "PowerShell(fnm env --shell power-shell | Out-String | Invoke-Expression; npx wrangler d1 execute imposter-db --local --command \"SELECT c.id, c.slug, c.emoji, COALESCE\\(t.name, tf.name, c.slug\\) AS name, COUNT\\(w.id\\) AS wordCount FROM categories c LEFT JOIN category_translations t ON t.category_id = c.id AND t.locale = 'es' LEFT JOIN category_translations tf ON tf.category_id = c.id AND tf.locale = 'en' LEFT JOIN words w ON w.category_id = c.id GROUP BY c.id ORDER BY name\")",
+      "PowerShell(fnm env --shell power-shell | Out-String | Invoke-Expression; npm run build)"
     ]
   }
 }

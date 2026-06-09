@@ -12,6 +12,8 @@ the frontend (React + Vite SPA served as Worker static assets). Data lives in Cl
 - Internal **word pool** in D1, each word paired with an impostor hint (users never browse the pool).
 - **Category multi-select** when starting a game — all categories selected by default.
 - Support for **multiple impostors** (always a strict minority of players).
+- **i18n**: English and Spanish out of the box — both the UI (language switcher, persisted per
+  device) and the word pool (translation tables in D1). Designed so adding a language is additive.
 
 ## How a round works
 
@@ -25,12 +27,17 @@ the frontend (React + Vite SPA served as Worker static assets). Data lives in Cl
 ## Project layout
 
 ```
-migrations/          D1 schema + seed words (the word pool)
+migrations/          D1 schema + seed words in EN/ES (the word pool)
 src/worker/          Hono app: auth (Google/Apple OIDC), session cookies, game API
 src/client/          React SPA (login, setup, reveal, discussion, results)
-src/shared/          Types shared by both sides
+src/client/i18n.tsx  UI message dictionaries (en/es) + locale context & switcher
+src/shared/          Types and locale list shared by both sides
 wrangler.jsonc       Worker + D1 + static assets configuration
 ```
+
+Text is never hardcoded per language: display strings for categories and words live in
+`category_translations` / `word_translations` keyed by locale (with fallback to the default
+locale), and every UI string lives in the typed dictionaries in `src/client/i18n.tsx`.
 
 ## Local development
 
@@ -95,11 +102,19 @@ requires HTTPS return URLs, so Apple login can't be tested on plain `http://loca
 | `POST /auth/logout` | Clear the session |
 | `GET /api/providers` | Which login providers are configured |
 | `GET /api/me` | Current session user |
-| `GET /api/categories` | Categories with word counts (auth required) |
-| `POST /api/game/start` | `{ categoryIds, playerCount, impostorCount }` → `{ round: { word, hint, category } }` (auth required) |
+| `GET /api/categories?locale=es` | Localized categories with word counts (auth required) |
+| `POST /api/game/start` | `{ categoryIds, playerCount, impostorCount, locale }` → `{ round: { word, hint, category } }` (auth required) |
 
 ## Adding words
 
-Add rows to `words` (with a matching `impostor_hint`) via a new migration in `migrations/`,
-then run `npm run db:migrate:remote`. The pool is internal — there is no user-facing endpoint
-that lists words.
+Add a row to `words` plus one row per locale in `word_translations` (word + `impostor_hint`)
+via a new migration in `migrations/`, then run `npm run db:migrate:remote`. The pool is
+internal — there is no user-facing endpoint that lists words.
+
+## Adding a language
+
+1. Add the locale to `SUPPORTED_LOCALES` in `src/shared/i18n.ts`.
+2. Add a `Messages` dictionary for it in `src/client/i18n.tsx` (the type makes missing keys a
+   compile error).
+3. Seed `category_translations` / `word_translations` rows for the new locale via a migration.
+   Words without a translation fall back to the default locale (`en`).

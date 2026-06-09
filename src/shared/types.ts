@@ -25,6 +25,8 @@ export interface StartGameRequest {
   categoryIds: number[];
   playerCount: number;
   impostorCount: number;
+  /** One of SUPPORTED_LOCALES; the server falls back to the default locale. */
+  locale?: string;
 }
 
 export interface GameRound {

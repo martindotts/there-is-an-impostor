@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Category, StartGameRequest } from '../../shared/types';
 import { MAX_PLAYERS, MIN_PLAYERS, maxImpostors } from '../../shared/types';
+import { useI18n } from '../i18n';
 
 interface Props {
   categories: Category[];
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function SetupScreen({ categories, initialConfig, onStart }: Props) {
+  const { m } = useI18n();
   // All categories selected by default.
   const [selected, setSelected] = useState<Set<number>>(
     () => new Set(initialConfig?.categoryIds ?? categories.map((c) => c.id)),
@@ -16,6 +18,12 @@ export function SetupScreen({ categories, initialConfig, onStart }: Props) {
   const [players, setPlayers] = useState(initialConfig?.playerCount ?? 6);
   const [impostors, setImpostors] = useState(initialConfig?.impostorCount ?? 1);
   const [starting, setStarting] = useState(false);
+
+  // The category list can arrive (or change) after mount; default to all selected
+  // unless the user is restoring a previous config.
+  useEffect(() => {
+    if (!initialConfig) setSelected(new Set(categories.map((c) => c.id)));
+  }, [categories, initialConfig]);
 
   const impostorCap = maxImpostors(players);
   useEffect(() => {
@@ -36,18 +44,18 @@ export function SetupScreen({ categories, initialConfig, onStart }: Props) {
 
   return (
     <div className="setup">
-      <h1>New game</h1>
+      <h1>{m.newGame}</h1>
 
       <section>
         <div className="section-header">
-          <h2>Categories</h2>
+          <h2>{m.categories}</h2>
           <button
             className="link-button"
             onClick={() =>
               setSelected(allSelected ? new Set() : new Set(categories.map((c) => c.id)))
             }
           >
-            {allSelected ? 'Clear all' : 'Select all'}
+            {allSelected ? m.clearAll : m.selectAll}
           </button>
         </div>
         <div className="category-grid">
@@ -63,30 +71,30 @@ export function SetupScreen({ categories, initialConfig, onStart }: Props) {
             </button>
           ))}
         </div>
-        {selected.size === 0 && <p className="muted small">Select at least one category.</p>}
+        {selected.size === 0 && <p className="muted small">{m.selectAtLeastOne}</p>}
       </section>
 
       <section>
-        <h2>Players</h2>
+        <h2>{m.players}</h2>
         <Stepper
           value={players}
           min={MIN_PLAYERS}
           max={MAX_PLAYERS}
           onChange={setPlayers}
-          label={`${players} players`}
+          label={m.playersLabel(players)}
         />
       </section>
 
       <section>
-        <h2>Impostors</h2>
+        <h2>{m.impostors}</h2>
         <Stepper
           value={impostors}
           min={1}
           max={impostorCap}
           onChange={setImpostors}
-          label={`${impostors} impostor${impostors > 1 ? 's' : ''}`}
+          label={m.impostorsLabel(impostors)}
         />
-        <p className="muted small">Up to {impostorCap} for {players} players.</p>
+        <p className="muted small">{m.impostorsCap(impostorCap, players)}</p>
       </section>
 
       <button
@@ -105,7 +113,7 @@ export function SetupScreen({ categories, initialConfig, onStart }: Props) {
           }
         }}
       >
-        {starting ? 'Starting…' : 'Start game'}
+        {starting ? m.starting : m.startGame}
       </button>
     </div>
   );
@@ -124,13 +132,14 @@ function Stepper({
   onChange: (v: number) => void;
   label: string;
 }) {
+  const { m } = useI18n();
   return (
     <div className="stepper">
       <button
         className="button round"
         disabled={value <= min}
         onClick={() => onChange(value - 1)}
-        aria-label="decrease"
+        aria-label={m.decrease}
       >
         −
       </button>
@@ -139,7 +148,7 @@ function Stepper({
         className="button round"
         disabled={value >= max}
         onClick={() => onChange(value + 1)}
-        aria-label="increase"
+        aria-label={m.increase}
       >
         +
       </button>

@@ -6,8 +6,13 @@ import type {
   StartGameRequest,
 } from '../shared/types';
 import { MAX_PLAYERS, MIN_PLAYERS, maxImpostors } from '../shared/types';
+import { DEFAULT_LOCALE, isLocale, type Locale } from '../shared/i18n';
 import type { AppContext } from './types';
 import { getSessionUser } from './session';
+
+function parseLocale(value: unknown): Locale {
+  return isLocale(value) ? value : DEFAULT_LOCALE;
+}
 
 export const apiRoutes = new Hono<AppContext>();
 
@@ -38,11 +43,19 @@ apiRoutes.use('*', async (c, next) => {
 });
 
 apiRoutes.get('/categories', async (c) => {
+  const locale = parseLocale(c.req.query('locale'));
   const { results } = await c.env.DB.prepare(
-    `SELECT c.id, c.slug, c.name, c.emoji, COUNT(w.id) AS wordCount
-     FROM categories c LEFT JOIN words w ON w.category_id = c.id
-     GROUP BY c.id ORDER BY c.name`,
-  ).all<Category>();
+    `SELECT c.id, c.slug, c.emoji,
+            COALESCE(t.name, tf.name, c.slug) AS name,
+            COUNT(w.id) AS wordCount
+     FROM categories c
+     LEFT JOIN category_translations t ON t.category_id = c.id AND t.locale = ?1
+     LEFT JOIN category_translations tf ON tf.category_id = c.id AND tf.locale = ?2
+     LEFT JOIN words w ON w.category_id = c.id
+     GROUP BY c.id ORDER BY name`,
+  )
+    .bind(locale, DEFAULT_LOCALE)
+    .all<Category>();
   return c.json({ categories: results });
 });
 
@@ -73,14 +86,23 @@ apiRoutes.post('/game/start', async (c) => {
     );
   }
 
-  const placeholders = categoryIds.map((_, i) => `?${i + 1}`).join(', ');
+  const locale = parseLocale(body.locale);
+  // ?1 = locale, ?2 = default locale, ?3+ = category ids.
+  const placeholders = categoryIds.map((_, i) => `?${i + 3}`).join(', ');
   const row = await c.env.DB.prepare(
-    `SELECT w.word, w.impostor_hint AS hint, c.name AS category
-     FROM words w JOIN categories c ON c.id = w.category_id
-     WHERE w.category_id IN (${placeholders})
+    `SELECT COALESCE(t.word, tf.word) AS word,
+            COALESCE(t.impostor_hint, tf.impostor_hint) AS hint,
+            COALESCE(ct.name, ctf.name, c.slug) AS category
+     FROM words w
+     JOIN categories c ON c.id = w.category_id
+     LEFT JOIN word_translations t ON t.word_id = w.id AND t.locale = ?1
+     LEFT JOIN word_translations tf ON tf.word_id = w.id AND tf.locale = ?2
+     LEFT JOIN category_translations ct ON ct.category_id = c.id AND ct.locale = ?1
+     LEFT JOIN category_translations ctf ON ctf.category_id = c.id AND ctf.locale = ?2
+     WHERE w.category_id IN (${placeholders}) AND COALESCE(t.word, tf.word) IS NOT NULL
      ORDER BY RANDOM() LIMIT 1`,
   )
-    .bind(...categoryIds)
+    .bind(locale, DEFAULT_LOCALE, ...categoryIds)
     .first<GameRound>();
 
   if (!row) return c.json({ error: 'no words found for the selected categories' }, 404);

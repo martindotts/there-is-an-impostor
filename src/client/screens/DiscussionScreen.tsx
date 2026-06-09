@@ -1,4 +1,5 @@
 import type { ActiveGame } from '../game';
+import { useI18n } from '../i18n';
 
 interface Props {
   game: ActiveGame;
@@ -6,21 +7,19 @@ interface Props {
 }
 
 export function DiscussionScreen({ game, onReveal }: Props) {
+  const { m } = useI18n();
   const impostorCount = game.impostor.filter(Boolean).length;
   return (
     <div className="centered discussion">
       <div className="logo">🗣️</div>
-      <h1>Discussion time</h1>
-      <p className="muted">Category: {game.round.category}</p>
+      <h1>{m.discussionTime}</h1>
+      <p className="muted">{m.categoryLabel(game.round.category)}</p>
       <p>
-        <strong>Player {game.startingPlayer}</strong> starts. Going around, everyone says one word
-        or phrase about the secret word. Then vote on who the {impostorCount > 1 ? 'impostors are' : 'impostor is'}.
+        <strong>{m.playerName(game.startingPlayer)}</strong> {m.discussionRules(impostorCount)}
       </p>
-      <p className="muted small">
-        {impostorCount} impostor{impostorCount > 1 ? 's are' : ' is'} hiding among you.
-      </p>
+      <p className="muted small">{m.impostorsHiding(impostorCount)}</p>
       <button className="button primary big" onClick={onReveal}>
-        Reveal the impostors
+        {m.revealImpostors}
       </button>
     </div>
   );

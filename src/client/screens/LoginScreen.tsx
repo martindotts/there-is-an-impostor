@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import type { Providers } from '../../shared/types';
 import { api } from '../api';
+import { LocaleSwitcher, useI18n } from '../i18n';
 
 export function LoginScreen() {
+  const { m } = useI18n();
   const [providers, setProviders] = useState<Providers | null>(null);
 
   useEffect(() => {
@@ -11,11 +13,12 @@ export function LoginScreen() {
 
   return (
     <div className="centered login">
+      <div className="login-locale">
+        <LocaleSwitcher />
+      </div>
       <div className="logo">🕵️</div>
       <h1>There Is an Impostor</h1>
-      <p className="muted">
-        Everyone gets the secret word — except the impostors. Find them before they blend in.
-      </p>
+      <p className="muted">{m.tagline}</p>
 
       <div className="login-buttons">
         <a
@@ -24,7 +27,7 @@ export function LoginScreen() {
           aria-disabled={providers ? !providers.google : false}
           onClick={(e) => providers && !providers.google && e.preventDefault()}
         >
-          <GoogleIcon /> Continue with Google
+          <GoogleIcon /> {m.continueWithGoogle}
         </a>
         <a
           className={`button provider-button ${providers && !providers.apple ? 'disabled' : ''}`}
@@ -32,19 +35,17 @@ export function LoginScreen() {
           aria-disabled={providers ? !providers.apple : false}
           onClick={(e) => providers && !providers.apple && e.preventDefault()}
         >
-          <AppleIcon /> Continue with Apple
+          <AppleIcon /> {m.continueWithApple}
         </a>
         {providers?.dev && (
           <a className="button provider-button dev" href="/auth/dev">
-            🛠️ Dev login (local only)
+            {m.devLogin}
           </a>
         )}
       </div>
 
       {providers && !providers.google && !providers.apple && (
-        <p className="muted small">
-          No login providers are configured yet. See the README for setup instructions.
-        </p>
+        <p className="muted small">{m.noProviders}</p>
       )}
     </div>
   );

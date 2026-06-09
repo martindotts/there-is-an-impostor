@@ -153,6 +153,40 @@ h2 {
   font-size: 0.9rem;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ----- locale switcher ----- */
+
+.locale-switcher {
+  display: inline-flex;
+  border: 1px solid var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.locale-switcher button {
+  background: var(--surface);
+  border: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.locale-switcher button.active {
+  background: var(--accent);
+  color: var(--text);
+}
+
+.login-locale {
+  align-self: flex-end;
+}
+
 .error-banner {
   background: #4a1f2b;
   border: 1px solid var(--accent);

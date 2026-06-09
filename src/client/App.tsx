@@ -3,6 +3,7 @@ import type { Category, SessionUser, StartGameRequest } from '../shared/types';
 import { api } from './api';
 import type { ActiveGame } from './game';
 import { buildGame } from './game';
+import { LocaleSwitcher, useI18n } from './i18n';
 import { LoginScreen } from './screens/LoginScreen';
 import { SetupScreen } from './screens/SetupScreen';
 import { RevealScreen } from './screens/RevealScreen';
@@ -18,6 +19,7 @@ type Screen =
   | { name: 'results'; game: ActiveGame };
 
 export function App() {
+  const { locale, m } = useI18n();
   const [user, setUser] = useState<SessionUser | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [screen, setScreen] = useState<Screen>({ name: 'loading' });
@@ -27,15 +29,9 @@ export function App() {
   useEffect(() => {
     api
       .me()
-      .then(async ({ user }) => {
-        if (!user) {
-          setScreen({ name: 'login' });
-          return;
-        }
+      .then(({ user }) => {
         setUser(user);
-        const { categories } = await api.categories();
-        setCategories(categories);
-        setScreen({ name: 'setup' });
+        setScreen(user ? { name: 'setup' } : { name: 'login' });
       })
       .catch((err: Error) => {
         setError(err.message);
@@ -43,16 +39,32 @@ export function App() {
       });
   }, []);
 
-  const startGame = useCallback(async (config: StartGameRequest) => {
-    setError(null);
-    try {
-      const { round } = await api.startGame(config);
-      setLastConfig(config);
-      setScreen({ name: 'reveal', game: buildGame(round, config.playerCount, config.impostorCount) });
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  }, []);
+  // Categories are localized server-side, so refetch when the language changes.
+  useEffect(() => {
+    if (!user) return;
+    api
+      .categories(locale)
+      .then(({ categories }) => setCategories(categories))
+      .catch((err: Error) => setError(err.message));
+  }, [user, locale]);
+
+  const startGame = useCallback(
+    async (config: StartGameRequest) => {
+      setError(null);
+      try {
+        const localized = { ...config, locale };
+        const { round } = await api.startGame(localized);
+        setLastConfig(localized);
+        setScreen({
+          name: 'reveal',
+          game: buildGame(round, config.playerCount, config.impostorCount),
+        });
+      } catch (err) {
+        setError((err as Error).message);
+      }
+    },
+    [locale],
+  );
 
   const logout = useCallback(async () => {
     await api.logout();
@@ -65,15 +77,18 @@ export function App() {
       {user && screen.name === 'setup' && (
         <header className="topbar">
           <span className="topbar-user">{user.name}</span>
-          <button className="link-button" onClick={logout}>
-            Sign out
-          </button>
+          <span className="topbar-actions">
+            <LocaleSwitcher />
+            <button className="link-button" onClick={logout}>
+              {m.signOut}
+            </button>
+          </span>
         </header>
       )}
 
       {error && <div className="error-banner">{error}</div>}
 
-      {screen.name === 'loading' && <div className="centered muted">Loading…</div>}
+      {screen.name === 'loading' && <div className="centered muted">{m.loading}</div>}
 
       {screen.name === 'login' && <LoginScreen />}
 
