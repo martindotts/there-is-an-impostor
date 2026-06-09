@@ -1,0 +1,29 @@
+{
+  "name": "there-is-an-imposter",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.worker.json --noEmit",
+    "deploy": "npm run build && wrangler deploy --config dist/there_is_an_imposter/wrangler.json",
+    "db:migrate:local": "wrangler d1 migrations apply imposter-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply imposter-db --remote"
+  },
+  "dependencies": {
+    "hono": "^4.7.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.0.0",
+    "@cloudflare/workers-types": "^4.20260601.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.4.0",
+    "typescript": "^5.8.0",
+    "vite": "^6.3.0",
+    "wrangler": "^4.20.0"
+  }
+}

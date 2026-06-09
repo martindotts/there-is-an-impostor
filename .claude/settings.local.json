@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm install)",
+      "Bash(npm --version)",
+      "PowerShell($paths = @\\(\"$env:ProgramFiles\\\\nodejs\\\\node.exe\", \"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\\\\node.exe\", \"$env:APPDATA\\\\nvm\", \"$env:LOCALAPPDATA\\\\nvs\", \"$env:LOCALAPPDATA\\\\Volta\", \"$env:USERPROFILE\\\\scoop\\\\apps\\\\nodejs\", \"$env:LOCALAPPDATA\\\\fnm_multishells\", \"$env:LOCALAPPDATA\\\\pnpm\", \"$env:ProgramFiles\\\\Volta\"\\); foreach \\($p in $paths\\) { if \\(Test-Path $p\\) { \"EXISTS: $p\" } }; Get-Command node, npm, fnm, volta, nvm, bun, deno -ErrorAction SilentlyContinue | Select-Object Name, Source)",
+      "PowerShell(fnm list)",
+      "PowerShell(fnm exec --using=default -- node --version)",
+      "PowerShell(fnm env --shell power-shell | Out-String | Invoke-Expression; npm install)",
+      "PowerShell(fnm env --shell power-shell | Out-String | Invoke-Expression; npm run check)",
+      "PowerShell(fnm env --shell power-shell | Out-String | Invoke-Expression; npm run check; if \\($?\\) { npm run build })",
+      "PowerShell(fnm env --shell power-shell | Out-String | Invoke-Expression; Copy-Item .dev.vars.example .dev.vars; npx wrangler d1 migrations apply imposter-db --local)",
+      "PowerShell(fnm env --shell power-shell | Out-String | Invoke-Expression; npm run dev)",
+      "Bash(cd /tmp)",
+      "Bash(curl -s http://localhost:5173/api/providers)",
+      "Bash(curl -s http://localhost:5173/api/me)",
+      "Bash(curl -s -i -c /tmp/imposter-cookies.txt \"http://localhost:5173/auth/dev?name=Martin\" -o /dev/null -w \"dev login: %{http_code} -> %{redirect_url}\\\\n\")",
+      "Bash(curl -s -b /tmp/imposter-cookies.txt http://localhost:5173/api/me)",
+      "Bash(curl -s -b /tmp/imposter-cookies.txt http://localhost:5173/api/categories)",
+      "Bash(curl -s http://localhost:5173/api/categories)",
+      "Bash(curl -s -b /tmp/imposter-cookies.txt -H \"Content-Type: application/json\" -d '{\"categoryIds\":[1,2,3,4,5,6,7,8],\"playerCount\":6,\"impostorCount\":2}' http://localhost:5173/api/game/start)",
+      "Bash(curl -s -b /tmp/imposter-cookies.txt -H \"Content-Type: application/json\" -d '{\"categoryIds\":[1],\"playerCount\":6,\"impostorCount\":4}' http://localhost:5173/api/game/start)",
+      "Bash(curl -s -b /tmp/imposter-cookies.txt -H \"Content-Type: application/json\" -d '{\"categoryIds\":[2],\"playerCount\":5,\"impostorCount\":1}' http://localhost:5173/api/game/start)",
+      "Bash(curl -s http://localhost:5173/)",
+      "Bash(curl -s -b /tmp/imposter-cookies.txt -X POST http://localhost:5173/auth/logout)",
+      "Bash(curl -s -i -b /tmp/imposter-cookies.txt -X POST http://localhost:5173/auth/logout)",
+      "Bash(curl -s -b /tmp/imposter-cookies.txt -c /tmp/imposter-cookies.txt -X POST http://localhost:5173/auth/logout)",
+      "PowerShell(git init)",
+      "PowerShell(git add -A)"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+# Copy to .dev.vars for local development (never commit .dev.vars).
+
+# Required: secret used to sign session cookies (any long random string).
+SESSION_SECRET=change-me-to-a-long-random-string
+
+# Enables GET /auth/dev (fake login) for local development only.
+DEV_AUTH=true
+
+# Google OAuth (https://console.cloud.google.com/apis/credentials)
+# Authorized redirect URI: http://localhost:5173/auth/google/callback
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# Sign in with Apple (https://developer.apple.com/account/resources/identifiers)
+# APPLE_CLIENT_ID is the Services ID. Apple requires an https redirect URI,
+# so Apple login generally cannot be tested on plain http://localhost.
+APPLE_CLIENT_ID=
+APPLE_TEAM_ID=
+APPLE_KEY_ID=
+# Contents of the .p8 key file. Keep the BEGIN/END lines; replace newlines with \n
+# or paste as-is if your tooling supports multiline values.
+APPLE_PRIVATE_KEY=

@@ -1,0 +1,264 @@
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface-2: #232736;
+  --text: #eef0f6;
+  --muted: #8b91a5;
+  --accent: #e94560;
+  --accent-dark: #c73650;
+  --ok: #3ddc84;
+  --radius: 14px;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin: 0.4em 0;
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin: 0.4em 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.centered {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 24px 0;
+}
+
+.logo {
+  font-size: 3.5rem;
+}
+
+/* ----- buttons ----- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--surface-2);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.05s;
+}
+
+.button:active {
+  transform: scale(0.98);
+}
+
+.button:disabled,
+.button.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: auto;
+}
+
+.button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.button.primary:not(:disabled):hover {
+  background: var(--accent-dark);
+}
+
+.button.big {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 1.1rem;
+  margin-top: 18px;
+}
+
+.button.round {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 1.4rem;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.button-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* ----- top bar / errors ----- */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.topbar-user {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.error-banner {
+  background: #4a1f2b;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+/* ----- login ----- */
+
+.login-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 24px;
+}
+
+.provider-button.dev {
+  border-style: dashed;
+}
+
+/* ----- setup ----- */
+
+.setup section {
+  margin-top: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.category-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--surface-2);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.category-chip.selected {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.category-emoji {
+  font-size: 1.2rem;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stepper-value {
+  flex: 1;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+/* ----- reveal / results ----- */
+
+.secret {
+  font-size: 2.2rem;
+  margin: 8px 0;
+  word-break: break-word;
+}
+
+.role-badge {
+  background: var(--accent);
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-weight: 700;
+}
+
+.impostor-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.impostor-tag {
+  background: var(--surface-2);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 600;
+}

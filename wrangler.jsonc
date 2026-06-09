@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "there-is-an-imposter",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-06-01",
+  // The Cloudflare Vite plugin points `directory` at the client build output.
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/auth/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "imposter-db",
+      // Replace with the real id printed by: wrangler d1 create imposter-db
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    // Set to "true" ONLY for local development to enable the fake login route.
+    "DEV_AUTH": "false"
+  }
+  // Secrets (set with `wrangler secret put <NAME>`, or .dev.vars locally):
+  //   SESSION_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
+  //   APPLE_CLIENT_ID, APPLE_TEAM_ID, APPLE_KEY_ID, APPLE_PRIVATE_KEY
+}
