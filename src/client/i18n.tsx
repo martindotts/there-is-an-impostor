@@ -29,6 +29,7 @@ export interface Messages {
   impostorsCap: (cap: number, players: number) => string;
   startGame: string;
   starting: string;
+  poolReset: string;
   decrease: string;
   increase: string;
   playerOf: (n: number, total: number) => string;
@@ -74,6 +75,7 @@ const en: Messages = {
   impostorsCap: (cap, players) => `Up to ${cap} for ${players} players.`,
   startGame: 'Start game',
   starting: 'Starting…',
+  poolReset: "You've seen every word in these categories, so the deck was reshuffled — words may repeat from now on.",
   decrease: 'decrease',
   increase: 'increase',
   playerOf: (n, total) => `Player ${n} of ${total}`,
@@ -123,6 +125,7 @@ const es: Messages = {
   impostorsCap: (cap, players) => `Hasta ${cap} para ${players} jugadores.`,
   startGame: 'Comenzar partida',
   starting: 'Comenzando…',
+  poolReset: 'Ya viste todas las palabras de estas categorías, así que el mazo se reinició: a partir de ahora pueden repetirse.',
   decrease: 'disminuir',
   increase: 'aumentar',
   playerOf: (n, total) => `Jugador ${n} de ${total}`,

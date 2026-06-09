@@ -14,6 +14,9 @@ the frontend (React + Vite SPA served as Worker static assets). Data lives in Cl
 - Support for **multiple impostors** (always a strict minority of players).
 - **i18n**: English and Spanish out of the box — both the UI (language switcher, persisted per
   device) and the word pool (translation tables in D1). Designed so adding a language is additive.
+- **No repeats per user**: the server remembers which words each user has played (across
+  languages) and never deals one twice. When a user exhausts the selected categories, their
+  history for those categories resets automatically and the app shows a notice.
 
 ## How a round works
 
@@ -103,7 +106,7 @@ requires HTTPS return URLs, so Apple login can't be tested on plain `http://loca
 | `GET /api/providers` | Which login providers are configured |
 | `GET /api/me` | Current session user |
 | `GET /api/categories?locale=es` | Localized categories with word counts (auth required) |
-| `POST /api/game/start` | `{ categoryIds, playerCount, impostorCount, locale }` → `{ round: { word, hint, category } }` (auth required) |
+| `POST /api/game/start` | `{ categoryIds, playerCount, impostorCount, locale }` → `{ round: { word, hint, category }, poolReset }` (auth required) |
 
 ## Adding words
 

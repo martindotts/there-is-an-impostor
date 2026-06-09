@@ -1,9 +1,9 @@
 import type {
   Category,
-  GameRound,
   Providers,
   SessionUser,
   StartGameRequest,
+  StartGameResponse,
 } from '../shared/types';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -27,7 +27,7 @@ export const api = {
   categories: (locale: string) =>
     request<{ categories: Category[] }>(`/api/categories?locale=${encodeURIComponent(locale)}`),
   startGame: (body: StartGameRequest) =>
-    request<{ round: GameRound }>('/api/game/start', {
+    request<StartGameResponse>('/api/game/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

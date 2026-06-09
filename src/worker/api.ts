@@ -4,6 +4,7 @@ import type {
   GameRound,
   Providers,
   StartGameRequest,
+  StartGameResponse,
 } from '../shared/types';
 import { MAX_PLAYERS, MIN_PLAYERS, maxImpostors } from '../shared/types';
 import { DEFAULT_LOCALE, isLocale, type Locale } from '../shared/i18n';
@@ -87,24 +88,60 @@ apiRoutes.post('/game/start', async (c) => {
   }
 
   const locale = parseLocale(body.locale);
-  // ?1 = locale, ?2 = default locale, ?3+ = category ids.
+  const user = c.get('user');
+  // ?1 = locale, ?2 = default locale, ?3+ = category ids, last = user id.
   const placeholders = categoryIds.map((_, i) => `?${i + 3}`).join(', ');
-  const row = await c.env.DB.prepare(
-    `SELECT COALESCE(t.word, tf.word) AS word,
-            COALESCE(t.impostor_hint, tf.impostor_hint) AS hint,
-            COALESCE(ct.name, ctf.name, c.slug) AS category
-     FROM words w
-     JOIN categories c ON c.id = w.category_id
-     LEFT JOIN word_translations t ON t.word_id = w.id AND t.locale = ?1
-     LEFT JOIN word_translations tf ON tf.word_id = w.id AND tf.locale = ?2
-     LEFT JOIN category_translations ct ON ct.category_id = c.id AND ct.locale = ?1
-     LEFT JOIN category_translations ctf ON ctf.category_id = c.id AND ctf.locale = ?2
-     WHERE w.category_id IN (${placeholders}) AND COALESCE(t.word, tf.word) IS NOT NULL
-     ORDER BY RANDOM() LIMIT 1`,
-  )
-    .bind(locale, DEFAULT_LOCALE, ...categoryIds)
-    .first<GameRound>();
+  const userParam = `?${categoryIds.length + 3}`;
+
+  const pickWord = () =>
+    c.env.DB.prepare(
+      `SELECT w.id AS wordId,
+              COALESCE(t.word, tf.word) AS word,
+              COALESCE(t.impostor_hint, tf.impostor_hint) AS hint,
+              COALESCE(ct.name, ctf.name, c.slug) AS category
+       FROM words w
+       JOIN categories c ON c.id = w.category_id
+       LEFT JOIN word_translations t ON t.word_id = w.id AND t.locale = ?1
+       LEFT JOIN word_translations tf ON tf.word_id = w.id AND tf.locale = ?2
+       LEFT JOIN category_translations ct ON ct.category_id = c.id AND ct.locale = ?1
+       LEFT JOIN category_translations ctf ON ctf.category_id = c.id AND ctf.locale = ?2
+       WHERE w.category_id IN (${placeholders})
+         AND COALESCE(t.word, tf.word) IS NOT NULL
+         AND w.id NOT IN (SELECT word_id FROM played_words WHERE user_id = ${userParam})
+       ORDER BY RANDOM() LIMIT 1`,
+    )
+      .bind(locale, DEFAULT_LOCALE, ...categoryIds, user.id)
+      .first<GameRound & { wordId: number }>();
+
+  let poolReset = false;
+  let row = await pickWord();
+  if (!row) {
+    // The user has played every word in these categories: clear their history
+    // for these categories only and start the pool over.
+    const idPlaceholders = categoryIds.map((_, i) => `?${i + 2}`).join(', ');
+    await c.env.DB.prepare(
+      `DELETE FROM played_words WHERE user_id = ?1
+       AND word_id IN (SELECT id FROM words WHERE category_id IN (${idPlaceholders}))`,
+    )
+      .bind(user.id, ...categoryIds)
+      .run();
+    poolReset = true;
+    row = await pickWord();
+  }
 
   if (!row) return c.json({ error: 'no words found for the selected categories' }, 404);
-  return c.json({ round: row });
+
+  try {
+    await c.env.DB.prepare(
+      'INSERT OR IGNORE INTO played_words (user_id, word_id) VALUES (?1, ?2)',
+    )
+      .bind(user.id, row.wordId)
+      .run();
+  } catch {
+    // A stale session for a deleted user must not break the round.
+  }
+
+  const { word, hint, category } = row;
+  const response: StartGameResponse = { round: { word, hint, category }, poolReset };
+  return c.json(response);
 });

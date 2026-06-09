@@ -35,6 +35,13 @@ export interface GameRound {
   category: string;
 }
 
+export interface StartGameResponse {
+  round: GameRound;
+  /** True when the user had seen every word in the selected categories and
+   *  their history was cleared, so words may repeat from here on. */
+  poolReset: boolean;
+}
+
 export const MIN_PLAYERS = 3;
 export const MAX_PLAYERS = 20;
 

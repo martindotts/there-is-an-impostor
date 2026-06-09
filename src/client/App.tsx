@@ -25,6 +25,7 @@ export function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'loading' });
   const [lastConfig, setLastConfig] = useState<StartGameRequest | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     api
@@ -51,10 +52,12 @@ export function App() {
   const startGame = useCallback(
     async (config: StartGameRequest) => {
       setError(null);
+      setNotice(null);
       try {
         const localized = { ...config, locale };
-        const { round } = await api.startGame(localized);
+        const { round, poolReset } = await api.startGame(localized);
         setLastConfig(localized);
+        if (poolReset) setNotice(m.poolReset);
         setScreen({
           name: 'reveal',
           game: buildGame(round, config.playerCount, config.impostorCount),
@@ -63,7 +66,7 @@ export function App() {
         setError((err as Error).message);
       }
     },
-    [locale],
+    [locale, m],
   );
 
   const logout = useCallback(async () => {
@@ -87,6 +90,7 @@ export function App() {
       )}
 
       {error && <div className="error-banner">{error}</div>}
+      {notice && screen.name === 'reveal' && <div className="info-banner">{notice}</div>}
 
       {screen.name === 'loading' && <div className="centered muted">{m.loading}</div>}
 
