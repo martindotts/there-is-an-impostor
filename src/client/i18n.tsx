@@ -18,6 +18,7 @@ export interface Messages {
   loading: string;
   signOut: string;
   language: string;
+  settings: string;
   showHintSetting: string;
   showCategorySetting: string;
   close: string;
@@ -76,6 +77,7 @@ const en: Messages = {
   loading: 'Loading…',
   signOut: 'Sign out',
   language: 'Language',
+  settings: 'Settings',
   showHintSetting: 'Show hint to impostors',
   showCategorySetting: 'Show category to impostors',
   close: 'Close',
@@ -138,6 +140,7 @@ const es: Messages = {
   loading: 'Cargando…',
   signOut: 'Cerrar sesión',
   language: 'Idioma',
+  settings: 'Configuración',
   showHintSetting: 'Mostrar pista al impostor',
   showCategorySetting: 'Mostrar categoría al impostor',
   close: 'Cerrar',

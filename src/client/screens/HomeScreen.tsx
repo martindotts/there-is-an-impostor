@@ -15,6 +15,7 @@ interface Props {
 export function HomeScreen({ user, settings, onUpdateSetting, onNewGame, onLogout }: Props) {
   const { m } = useI18n();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <>
@@ -22,6 +23,13 @@ export function HomeScreen({ user, settings, onUpdateSetting, onNewGame, onLogou
         <button className="profile-button" onClick={() => setProfileOpen(true)}>
           <Avatar user={user} />
           <span className="profile-name">{user.name}</span>
+        </button>
+        <button
+          className="profile-button icon"
+          aria-label={m.settings}
+          onClick={() => setSettingsOpen(true)}
+        >
+          ⚙️
         </button>
       </header>
 
@@ -35,12 +43,14 @@ export function HomeScreen({ user, settings, onUpdateSetting, onNewGame, onLogou
       </div>
 
       {profileOpen && (
-        <ProfileModal
-          user={user}
+        <ProfileModal user={user} onClose={() => setProfileOpen(false)} onLogout={onLogout} />
+      )}
+
+      {settingsOpen && (
+        <SettingsModal
           settings={settings}
           onUpdateSetting={onUpdateSetting}
-          onClose={() => setProfileOpen(false)}
-          onLogout={onLogout}
+          onClose={() => setSettingsOpen(false)}
         />
       )}
     </>
@@ -60,14 +70,10 @@ function Avatar({ user }: { user: SessionUser }) {
 
 function ProfileModal({
   user,
-  settings,
-  onUpdateSetting,
   onClose,
   onLogout,
 }: {
   user: SessionUser;
-  settings: UserSettings;
-  onUpdateSetting: (patch: SettingsPatch) => void;
   onClose: () => void;
   onLogout: () => void;
 }) {
@@ -85,6 +91,32 @@ function ProfileModal({
             {user.email && <div className="muted small">{user.email}</div>}
           </div>
         </div>
+
+        <button className="button big" onClick={onLogout}>
+          {m.signOut}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SettingsModal({
+  settings,
+  onUpdateSetting,
+  onClose,
+}: {
+  settings: UserSettings;
+  onUpdateSetting: (patch: SettingsPatch) => void;
+  onClose: () => void;
+}) {
+  const { m } = useI18n();
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close" aria-label={m.close} onClick={onClose}>
+          ✕
+        </button>
+        <h2 className="modal-title">{m.settings}</h2>
 
         <div className="modal-row">
           <span>{m.language}</span>
@@ -108,10 +140,6 @@ function ProfileModal({
             onChange={(showCategory) => onUpdateSetting({ showCategory })}
           />
         </div>
-
-        <button className="button big" onClick={onLogout}>
-          {m.signOut}
-        </button>
       </div>
     </div>
   );
