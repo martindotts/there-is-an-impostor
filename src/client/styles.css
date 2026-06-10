@@ -142,6 +142,20 @@ h2 {
   border-radius: 999px;
 }
 
+.button.toggle-all {
+  display: inline-grid;
+  justify-items: center;
+  white-space: nowrap;
+}
+
+.button.toggle-all span {
+  grid-area: 1 / 1;
+}
+
+.button.toggle-all .ghost {
+  visibility: hidden;
+}
+
 .button-row {
   display: flex;
   flex-direction: column;

@@ -93,12 +93,15 @@ export function SetupScreen({
             <div className="section-header">
               <span className="muted small">{m.selectAtLeastOne}</span>
               <button
-                className="button small"
+                className="button small toggle-all"
                 onClick={() =>
                   setSelected(allSelected ? new Set() : new Set(categories.map((c) => c.id)))
                 }
               >
-                {allSelected ? m.clearAll : m.selectAll}
+                {/* Both labels overlap in a grid so the button keeps the width
+                    of the longest one and toggling never reflows the layout. */}
+                <span className={allSelected ? undefined : 'ghost'}>{m.clearAll}</span>
+                <span className={allSelected ? 'ghost' : undefined}>{m.selectAll}</span>
               </button>
             </div>
             <div className="category-grid">
