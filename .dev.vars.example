@@ -6,6 +6,11 @@ SESSION_SECRET=change-me-to-a-long-random-string
 # Enables GET /auth/dev (fake login) for local development only.
 DEV_AUTH=true
 
+# Generate fake words locally instead of calling Workers AI. The AI binding
+# hits the real Cloudflare API (and spends neurons) even in `wrangler dev`,
+# so keep this "true" unless you are specifically testing real generation.
+MOCK_AI=true
+
 # Google OAuth (https://console.cloud.google.com/apis/credentials)
 # Authorized redirect URI: http://localhost:5173/auth/google/callback
 GOOGLE_CLIENT_ID=

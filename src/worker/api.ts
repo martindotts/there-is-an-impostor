@@ -18,6 +18,7 @@ import {
 import { DEFAULT_LOCALE, defaultPlayerName, isLocale, type Locale } from '../shared/i18n';
 import type { AppContext } from './types';
 import { getVerifiedSessionUser } from './session';
+import { topUpDepletedCategories } from './wordgen';
 
 function parseLocale(value: unknown): Locale {
   return isLocale(value) ? value : DEFAULT_LOCALE;
@@ -280,6 +281,10 @@ apiRoutes.post('/game/start', async (c) => {
   await c.env.DB.prepare('INSERT OR IGNORE INTO played_words (user_id, word_id) VALUES (?1, ?2)')
     .bind(user.id, row.wordId)
     .run();
+
+  // After (not before) responding, restock any category this user has nearly
+  // exhausted — the new words land in the global pool for everyone.
+  c.executionCtx.waitUntil(topUpDepletedCategories(c.env, user.id));
 
   const { word, hint, category } = row;
   const response: StartGameResponse = { round: { word, hint, category }, poolReset };

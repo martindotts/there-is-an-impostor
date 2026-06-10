@@ -17,9 +17,18 @@
       "migrations_dir": "migrations"
     }
   ],
+  // Workers AI, used to top up the word pool in the background.
+  "ai": {
+    "binding": "AI"
+  },
   "vars": {
     // Set to "true" ONLY for local development to enable the fake login route.
-    "DEV_AUTH": "false"
+    "DEV_AUTH": "false",
+    // Model used to generate new words/hints. Swap here to compare quality.
+    "AI_MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    // Set to "true" in local dev to generate fake words without calling
+    // Workers AI (the AI binding hits the real API even in `wrangler dev`).
+    "MOCK_AI": "false"
   }
   // Secrets (set with `wrangler secret put <NAME>`, or .dev.vars locally):
   //   SESSION_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,

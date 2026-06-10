@@ -30,6 +30,12 @@ the frontend (React + Vite SPA served as Worker static assets). Data lives in Cl
   and revalidate silently, so navigation never waits on the network.
 - **Account settings** (profile modal): language (synced across devices), and whether impostors
   get to see the hint and/or the category — both snapshotted per round.
+- **Self-growing word pool (Workers AI)**: after each game start, any category where the user
+  has 2 or fewer unplayed words left gets 10 fresh AI-generated words (EN + ES, single-word
+  non-obvious hints) added to the global pool in the background. Generated words are validated
+  (deduped, hint quality rules) before insertion; failures are silent and the game is never
+  delayed. Model is configured via the `AI_MODEL` var in `wrangler.jsonc`; set `MOCK_AI=true`
+  in `.dev.vars` to develop without spending Workers AI quota.
 
 ## How a round works
 
