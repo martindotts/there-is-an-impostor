@@ -1,4 +1,5 @@
 -- Users authenticated via Google / Apple (or the local dev provider).
+-- Settings live as columns here: a user always has settings.
 CREATE TABLE users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   provider TEXT NOT NULL,
@@ -10,6 +11,11 @@ CREATE TABLE users (
   picture TEXT,
   -- Whether the default player roster was already seeded once for this user.
   players_seeded INTEGER NOT NULL DEFAULT 0,
+  -- Preferred language; null until the first sign-in adopts the device locale.
+  locale TEXT,
+  -- What impostors get to see during a round.
+  show_hint INTEGER NOT NULL DEFAULT 1,
+  show_category INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE (provider, provider_id)
 );
