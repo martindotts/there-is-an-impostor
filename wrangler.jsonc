@@ -13,7 +13,7 @@
       "binding": "DB",
       "database_name": "imposter-db",
       // Replace with the real id printed by: wrangler d1 create imposter-db
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "84de6ba4-8600-4759-9ed4-e764d64cf159",
       "migrations_dir": "migrations"
     }
   ],
