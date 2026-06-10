@@ -15,7 +15,7 @@ import {
 } from '../shared/types';
 import { DEFAULT_LOCALE, defaultPlayerName, isLocale, type Locale } from '../shared/i18n';
 import type { AppContext } from './types';
-import { getSessionUser } from './session';
+import { getVerifiedSessionUser } from './session';
 
 function parseLocale(value: unknown): Locale {
   return isLocale(value) ? value : DEFAULT_LOCALE;
@@ -36,14 +36,14 @@ apiRoutes.get('/providers', (c) => {
 });
 
 apiRoutes.get('/me', async (c) => {
-  const user = await getSessionUser(c);
+  const user = await getVerifiedSessionUser(c);
   if (!user) return c.json({ user: null });
   return c.json({ user });
 });
 
-// Everything below requires a session.
+// Everything below requires a session backed by an existing user.
 apiRoutes.use('*', async (c, next) => {
-  const user = await getSessionUser(c);
+  const user = await getVerifiedSessionUser(c);
   if (!user) return c.json({ error: 'unauthorized' }, 401);
   c.set('user', user);
   await next();
@@ -211,15 +211,9 @@ apiRoutes.post('/game/start', async (c) => {
 
   if (!row) return c.json({ error: 'no words found for the selected categories' }, 404);
 
-  try {
-    await c.env.DB.prepare(
-      'INSERT OR IGNORE INTO played_words (user_id, word_id) VALUES (?1, ?2)',
-    )
-      .bind(user.id, row.wordId)
-      .run();
-  } catch {
-    // A stale session for a deleted user must not break the round.
-  }
+  await c.env.DB.prepare('INSERT OR IGNORE INTO played_words (user_id, word_id) VALUES (?1, ?2)')
+    .bind(user.id, row.wordId)
+    .run();
 
   const { word, hint, category } = row;
   const response: StartGameResponse = { round: { word, hint, category }, poolReset };

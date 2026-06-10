@@ -48,3 +48,22 @@ export async function getSessionUser(c: Context<AppContext>): Promise<SessionUse
 export function clearSession(c: Context<AppContext>): void {
   deleteCookie(c, SESSION_COOKIE, { path: '/' });
 }
+
+/**
+ * Like getSessionUser, but also checks the user still exists in the database.
+ * A signed cookie can outlive its user row (e.g. after a database reset);
+ * treating it as logged-in would break everything keyed by user id, like the
+ * played-words history. Invalid ghost sessions are cleared.
+ */
+export async function getVerifiedSessionUser(c: Context<AppContext>): Promise<SessionUser | null> {
+  const user = await getSessionUser(c);
+  if (!user) return null;
+  const row = await c.env.DB.prepare('SELECT id FROM users WHERE id = ?1')
+    .bind(user.id)
+    .first<{ id: number }>();
+  if (!row) {
+    clearSession(c);
+    return null;
+  }
+  return user;
+}
