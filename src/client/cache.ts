@@ -1,7 +1,7 @@
 // Tiny localStorage cache for stale-while-revalidate rendering: screens paint
 // instantly from the last known data while fresh data loads in the background.
 
-const PREFIX = 'imposter:cache:';
+const PREFIX = 'impostor:cache:';
 
 export function readCache<T>(key: string): T | null {
   try {
@@ -33,7 +33,7 @@ export function clearCache(): void {
 // Device preferences (like the locale) live under their own prefix so
 // clearCache() on sign-out does not wipe them.
 
-const PREF_PREFIX = 'imposter:pref:';
+const PREF_PREFIX = 'impostor:pref:';
 
 export function readPref<T>(key: string): T | null {
   try {

@@ -81,7 +81,7 @@ without OAuth credentials.
 1. Create the database and copy its id into `wrangler.jsonc` (`database_id`):
 
    ```sh
-   wrangler d1 create imposter-db
+   wrangler d1 create impostor-db
    npm run db:migrate:remote
    ```
 

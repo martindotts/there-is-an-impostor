@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "there-is-an-imposter",
+  "name": "there-is-an-impostor",
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-06-01",
   // The Cloudflare Vite plugin points `directory` at the client build output.
@@ -11,9 +11,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "imposter-db",
-      // Replace with the real id printed by: wrangler d1 create imposter-db
-      "database_id": "84de6ba4-8600-4759-9ed4-e764d64cf159",
+      "database_name": "impostor-db",
+      "database_id": "3344e24c-0484-480f-b7e2-89a796de555f",
       "migrations_dir": "migrations"
     }
   ],
