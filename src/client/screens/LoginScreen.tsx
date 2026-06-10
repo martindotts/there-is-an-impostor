@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Wrench } from 'lucide-react';
 import type { Providers } from '../../shared/types';
 import { api } from '../api';
 import { readCache, writeCache } from '../cache';
@@ -49,7 +50,7 @@ export function LoginScreen() {
         </a>
         {providers?.dev && (
           <a className="button provider-button dev" href="/auth/dev">
-            {m.devLogin}
+            <Wrench size={18} /> {m.devLogin}
           </a>
         )}
       </div>

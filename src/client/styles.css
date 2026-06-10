@@ -101,6 +101,10 @@ h2 {
   transform: scale(0.98);
 }
 
+.button svg {
+  flex-shrink: 0;
+}
+
 .button:disabled,
 .button.disabled {
   opacity: 0.45;
@@ -461,10 +465,12 @@ h2 {
 }
 
 .roster-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 1rem;
   cursor: pointer;
   padding: 10px 14px;
   margin: -10px -14px -10px 0;

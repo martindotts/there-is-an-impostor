@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Settings, UserRound, X } from 'lucide-react';
 import type { SessionUser, UserSettings } from '../../shared/types';
 import { LocaleSwitcher, useI18n } from '../i18n';
 
@@ -29,7 +30,7 @@ export function HomeScreen({ user, settings, onUpdateSetting, onNewGame, onLogou
           aria-label={m.settings}
           onClick={() => setSettingsOpen(true)}
         >
-          ⚙️
+          <Settings size={22} />
         </button>
       </header>
 
@@ -61,9 +62,10 @@ function Avatar({ user }: { user: SessionUser }) {
   if (user.picture) {
     return <img className="avatar" src={user.picture} alt="" referrerPolicy="no-referrer" />;
   }
+  const initial = user.name.charAt(0).toUpperCase();
   return (
     <span className="avatar avatar-default" aria-hidden="true">
-      {user.name.charAt(0).toUpperCase() || '🕵️'}
+      {initial || <UserRound size={18} />}
     </span>
   );
 }
@@ -82,7 +84,7 @@ function ProfileModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" aria-label={m.close} onClick={onClose}>
-          ✕
+          <X size={20} />
         </button>
         <div className="modal-profile">
           <Avatar user={user} />
@@ -114,7 +116,7 @@ function SettingsModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" aria-label={m.close} onClick={onClose}>
-          ✕
+          <X size={20} />
         </button>
         <h2 className="modal-title">{m.settings}</h2>
 

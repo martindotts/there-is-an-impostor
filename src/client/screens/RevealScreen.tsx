@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check } from 'lucide-react';
 import type { ActiveGame } from '../game';
 import { useI18n } from '../i18n';
 
@@ -36,7 +37,7 @@ export function RevealScreen({ game, onDone }: Props) {
                 onClick={() => setCurrent(i)}
               >
                 <span className="roster-name">{name}</span>
-                {revealed[i] && <span aria-hidden="true">✓</span>}
+                {revealed[i] && <Check size={20} aria-hidden="true" />}
               </button>
             </li>
           ))}

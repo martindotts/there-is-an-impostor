@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowLeft, Minus, Plus, X } from 'lucide-react';
 import type { Category, Player } from '../../shared/types';
 import { MAX_PLAYERS, MAX_PLAYER_NAME_LENGTH, MIN_PLAYERS, maxImpostors } from '../../shared/types';
 import type { GameConfig } from '../App';
@@ -80,7 +81,7 @@ export function SetupScreen({
           aria-label={m.back}
           onClick={() => (step === 1 ? onBack() : setStep(1))}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <span className="muted small">{m.stepOf(step, 2)}</span>
       </div>
@@ -189,7 +190,7 @@ function RosterEditor({
               aria-label={m.removePlayer(p.name)}
               onClick={() => onRemove(p.id)}
             >
-              ✕
+              <X size={18} />
             </button>
           </li>
         ))}
@@ -235,7 +236,7 @@ function Stepper({
         onClick={() => onChange(value - 1)}
         aria-label={m.decrease}
       >
-        −
+        <Minus size={20} />
       </button>
       <span className="stepper-value">{label}</span>
       <button
@@ -244,7 +245,7 @@ function Stepper({
         onClick={() => onChange(value + 1)}
         aria-label={m.increase}
       >
-        +
+        <Plus size={20} />
       </button>
     </div>
   );
