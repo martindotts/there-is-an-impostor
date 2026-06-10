@@ -3,6 +3,7 @@ import { Wrench } from 'lucide-react';
 import type { Providers } from '../../shared/types';
 import { api } from '../api';
 import { readCache, writeCache } from '../cache';
+import { FeatureList } from '../FeatureList';
 import { LocaleSwitcher, useI18n } from '../i18n';
 
 export function LoginScreen() {
@@ -30,6 +31,8 @@ export function LoginScreen() {
       <div className="logo">🕵️</div>
       <h1>There Is an Impostor</h1>
       <p className="muted">{m.tagline}</p>
+
+      <FeatureList />
 
       <div className="login-buttons">
         <a

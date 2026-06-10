@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Settings, UserRound, X } from 'lucide-react';
 import type { SessionUser, UserSettings } from '../../shared/types';
+import { FeatureList } from '../FeatureList';
 import { LocaleSwitcher, useI18n } from '../i18n';
 
 type SettingsPatch = Partial<Pick<UserSettings, 'showHint' | 'showCategory'>>;
@@ -41,6 +42,7 @@ export function HomeScreen({ user, settings, onUpdateSetting, onNewGame, onLogou
         <button className="button primary big" onClick={onNewGame}>
           {m.newGame}
         </button>
+        <FeatureList compact />
       </div>
 
       {profileOpen && (

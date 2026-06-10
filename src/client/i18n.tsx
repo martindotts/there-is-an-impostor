@@ -11,6 +11,10 @@ const STORAGE_KEY = 'locale';
  */
 export interface Messages {
   tagline: string;
+  featureEndlessTitle: string;
+  featureEndlessText: string;
+  featureNoRepeatTitle: string;
+  featureNoRepeatText: string;
   continueWithGoogle: string;
   continueWithApple: string;
   devLogin: string;
@@ -70,6 +74,10 @@ export interface Messages {
 
 const en: Messages = {
   tagline: 'Everyone gets the secret word — except the impostors. Find them before they blend in.',
+  featureEndlessTitle: 'Endless words',
+  featureEndlessText: 'the deck grows itself with AI',
+  featureNoRepeatTitle: 'Never repeated',
+  featureNoRepeatText: "you won't see the same word twice",
   continueWithGoogle: 'Continue with Google',
   continueWithApple: 'Continue with Apple',
   devLogin: 'Dev login (local only)',
@@ -133,6 +141,10 @@ const en: Messages = {
 
 const es: Messages = {
   tagline: 'Todos reciben la palabra secreta, excepto los impostores. Encuéntralos antes de que se mimeticen.',
+  featureEndlessTitle: 'Palabras infinitas',
+  featureEndlessText: 'el mazo crece solo con IA',
+  featureNoRepeatTitle: 'Nunca repetidas',
+  featureNoRepeatText: 'no volverás a ver la misma palabra',
   continueWithGoogle: 'Continuar con Google',
   continueWithApple: 'Continuar con Apple',
   devLogin: 'Acceso dev (solo local)',
