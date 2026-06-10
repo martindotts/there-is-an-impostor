@@ -3,6 +3,11 @@
 A pass-the-phone party game. Everyone gets the secret word — except the impostors, who only get
 a vague hint. Take turns describing the word, then vote on who's faking it.
 
+> [!NOTE]
+> This project is **100% vibe-coded**: every single line — code, SQL, styles, and this very
+> README — was written by [Claude Code](https://claude.com/claude-code). Not one line was
+> written by hand by the repository owner, who acted purely as product owner and tester.
+
 Single repository containing both the backend (Cloudflare Worker, [Hono](https://hono.dev)) and
 the frontend (React + Vite SPA served as Worker static assets). Data lives in Cloudflare D1.
 
