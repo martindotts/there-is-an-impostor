@@ -13,6 +13,21 @@ export interface Player {
   name: string;
 }
 
+export interface UserSettings {
+  /** Preferred UI/game language; null until the user picks one. */
+  locale: string | null;
+  /** Whether impostors are shown the hint word. */
+  showHint: boolean;
+  /** Whether impostors are shown the category. */
+  showCategory: boolean;
+}
+
+export interface UpdateSettingsRequest {
+  locale?: string;
+  showHint?: boolean;
+  showCategory?: boolean;
+}
+
 export const MAX_PLAYER_NAME_LENGTH = 30;
 
 export interface Category {

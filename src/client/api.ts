@@ -5,6 +5,8 @@ import type {
   SessionUser,
   StartGameRequest,
   StartGameResponse,
+  UpdateSettingsRequest,
+  UserSettings,
 } from '../shared/types';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -23,7 +25,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  me: () => request<{ user: SessionUser | null }>('/api/me'),
+  me: () => request<{ user: SessionUser | null; settings: UserSettings | null }>('/api/me'),
+  updateSettings: (body: UpdateSettingsRequest) =>
+    request<{ settings: UserSettings }>('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }),
   providers: () => request<Providers>('/api/providers'),
   categories: (locale: string) =>
     request<{ categories: Category[] }>(`/api/categories?locale=${encodeURIComponent(locale)}`),

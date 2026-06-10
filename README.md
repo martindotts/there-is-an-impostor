@@ -23,6 +23,8 @@ the frontend (React + Vite SPA served as Worker static assets). Data lives in Cl
 - **Optimistic UI**: roster edits, game start, and sign-out apply instantly and sync (or roll
   back) in the background; session, categories, roster, and providers render from a local cache
   and revalidate silently, so navigation never waits on the network.
+- **Account settings** (profile modal): language (synced across devices), and whether impostors
+  get to see the hint and/or the category — both snapshotted per round.
 
 ## How a round works
 
@@ -113,7 +115,8 @@ requires HTTPS return URLs, so Apple login can't be tested on plain `http://loca
 | `GET /auth/google/callback`, `POST /auth/apple/callback` | OAuth callbacks |
 | `POST /auth/logout` | Clear the session |
 | `GET /api/providers` | Which login providers are configured |
-| `GET /api/me` | Current session user |
+| `GET /api/me` | Current session user + their settings |
+| `PUT /api/settings` | Update preferences: `{ locale?, showHint?, showCategory? }` (auth required) |
 | `GET /api/categories?locale=es` | Localized categories with word counts (auth required) |
 | `GET /api/players?locale=es` | Saved roster; seeds 3 localized defaults on first call (auth required) |
 | `POST /api/players`, `DELETE /api/players/:id` | Add / remove a roster player (auth required) |

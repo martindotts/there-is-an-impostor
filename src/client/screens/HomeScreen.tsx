@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import type { SessionUser } from '../../shared/types';
+import type { SessionUser, UserSettings } from '../../shared/types';
 import { LocaleSwitcher, useI18n } from '../i18n';
+
+type SettingsPatch = Partial<Pick<UserSettings, 'showHint' | 'showCategory'>>;
 
 interface Props {
   user: SessionUser;
+  settings: UserSettings;
+  onUpdateSetting: (patch: SettingsPatch) => void;
   onNewGame: () => void;
   onLogout: () => void;
 }
 
-export function HomeScreen({ user, onNewGame, onLogout }: Props) {
+export function HomeScreen({ user, settings, onUpdateSetting, onNewGame, onLogout }: Props) {
   const { m } = useI18n();
   const [profileOpen, setProfileOpen] = useState(false);
 
@@ -31,7 +35,13 @@ export function HomeScreen({ user, onNewGame, onLogout }: Props) {
       </div>
 
       {profileOpen && (
-        <ProfileModal user={user} onClose={() => setProfileOpen(false)} onLogout={onLogout} />
+        <ProfileModal
+          user={user}
+          settings={settings}
+          onUpdateSetting={onUpdateSetting}
+          onClose={() => setProfileOpen(false)}
+          onLogout={onLogout}
+        />
       )}
     </>
   );
@@ -50,10 +60,14 @@ function Avatar({ user }: { user: SessionUser }) {
 
 function ProfileModal({
   user,
+  settings,
+  onUpdateSetting,
   onClose,
   onLogout,
 }: {
   user: SessionUser;
+  settings: UserSettings;
+  onUpdateSetting: (patch: SettingsPatch) => void;
   onClose: () => void;
   onLogout: () => void;
 }) {
@@ -77,10 +91,50 @@ function ProfileModal({
           <LocaleSwitcher />
         </div>
 
+        <div className="modal-row">
+          <span>{m.showHintSetting}</span>
+          <Switch
+            checked={settings.showHint}
+            label={m.showHintSetting}
+            onChange={(showHint) => onUpdateSetting({ showHint })}
+          />
+        </div>
+
+        <div className="modal-row">
+          <span>{m.showCategorySetting}</span>
+          <Switch
+            checked={settings.showCategory}
+            label={m.showCategorySetting}
+            onChange={(showCategory) => onUpdateSetting({ showCategory })}
+          />
+        </div>
+
         <button className="button big" onClick={onLogout}>
           {m.signOut}
         </button>
       </div>
     </div>
+  );
+}
+
+function Switch({
+  checked,
+  label,
+  onChange,
+}: {
+  checked: boolean;
+  label: string;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <button
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      className={`switch ${checked ? 'on' : ''}`}
+      onClick={() => onChange(!checked)}
+    >
+      <span className="switch-thumb" />
+    </button>
   );
 }

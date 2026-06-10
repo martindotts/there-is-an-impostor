@@ -18,6 +18,8 @@ export interface Messages {
   loading: string;
   signOut: string;
   language: string;
+  showHintSetting: string;
+  showCategorySetting: string;
   close: string;
   newGame: string;
   next: string;
@@ -74,6 +76,8 @@ const en: Messages = {
   loading: 'Loading…',
   signOut: 'Sign out',
   language: 'Language',
+  showHintSetting: 'Show hint to impostors',
+  showCategorySetting: 'Show category to impostors',
   close: 'Close',
   newGame: 'New game',
   next: 'Next',
@@ -134,6 +138,8 @@ const es: Messages = {
   loading: 'Cargando…',
   signOut: 'Cerrar sesión',
   language: 'Idioma',
+  showHintSetting: 'Mostrar pista al impostor',
+  showCategorySetting: 'Mostrar categoría al impostor',
   close: 'Cerrar',
   newGame: 'Nuevo juego',
   next: 'Siguiente',

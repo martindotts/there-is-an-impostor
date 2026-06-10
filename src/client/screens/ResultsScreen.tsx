@@ -19,7 +19,7 @@ export function ResultsScreen({ game, onPlayAgain, onNewSetup }: Props) {
         <>
           <p className="muted">{m.secretWordWas}</p>
           <h2 className="secret">{game.round.word}</h2>
-          <p className="muted">{m.hintWas(game.round.hint)}</p>
+          {game.showHint && <p className="muted">{m.hintWas(game.round.hint)}</p>}
         </>
       )}
       <div className="impostor-list">

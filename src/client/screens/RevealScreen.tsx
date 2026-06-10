@@ -75,12 +75,18 @@ export function RevealScreen({ game, onDone }: Props) {
   const isImpostor = game.impostor[current];
   return (
     <div className={`centered reveal ${isImpostor ? 'impostor' : ''}`}>
-      <p className="muted">{m.categoryLabel(game.round.category)}</p>
+      {(!isImpostor || game.showCategory) && (
+        <p className="muted">{m.categoryLabel(game.round.category)}</p>
+      )}
       {isImpostor ? (
         <>
           <div className="role-badge">{m.youAreImpostor}</div>
-          <p className="muted">{m.yourHint}</p>
-          <h1 className="secret">“{game.round.hint}”</h1>
+          {game.showHint && (
+            <>
+              <p className="muted">{m.yourHint}</p>
+              <h1 className="secret">“{game.round.hint}”</h1>
+            </>
+          )}
           <p className="muted small">{m.blendIn}</p>
         </>
       ) : (

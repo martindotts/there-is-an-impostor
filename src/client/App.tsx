@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Category, Player, SessionUser } from '../shared/types';
+import type { Category, Player, SessionUser, UserSettings } from '../shared/types';
+import { isLocale } from '../shared/i18n';
 import { api } from './api';
 import { clearCache, readCache, writeCache } from './cache';
 import type { ActiveGame } from './game';
@@ -26,14 +27,19 @@ export interface GameConfig {
   impostorCount: number;
 }
 
+const DEFAULT_SETTINGS: UserSettings = { locale: null, showHint: true, showCategory: true };
+
 export function App() {
-  const { locale, m } = useI18n();
+  const { locale, setLocale, m } = useI18n();
   // Paint instantly from the cached session; api.me() revalidates below.
   const [user, setUser] = useState<SessionUser | null>(() => readCache<SessionUser>('user'));
   const [categories, setCategories] = useState<Category[]>(
     () => readCache<Category[]>(`categories:${locale}`) ?? [],
   );
   const [players, setPlayers] = useState<Player[]>(() => readCache<Player[]>('players') ?? []);
+  const [settings, setSettings] = useState<UserSettings>(
+    () => readCache<UserSettings>('settings') ?? DEFAULT_SETTINGS,
+  );
   const [screen, setScreen] = useState<Screen>(() =>
     readCache<SessionUser>('user') ? { name: 'home' } : { name: 'loading' },
   );
@@ -49,10 +55,17 @@ export function App() {
   useEffect(() => {
     api
       .me()
-      .then(({ user }) => {
+      .then(({ user, settings: serverSettings }) => {
         setUser(user);
         if (user) {
           writeCache('user', user);
+          if (serverSettings) {
+            setSettings(serverSettings);
+            // The account's language preference wins over the device default.
+            if (serverSettings.locale && isLocale(serverSettings.locale)) {
+              setLocale(serverSettings.locale);
+            }
+          }
           setScreen((prev) => (prev.name === 'loading' ? { name: 'home' } : prev));
         } else {
           clearCache();
@@ -103,6 +116,30 @@ export function App() {
   useEffect(() => {
     if (user) writeCache('players', players.filter((p) => p.id > 0));
   }, [user, players]);
+
+  useEffect(() => {
+    if (user) writeCache('settings', settings);
+  }, [user, settings]);
+
+  // Persist the language choice to the account whenever it diverges (covers
+  // both switcher changes and the first sign-in, where locale is still null).
+  useEffect(() => {
+    if (!user || settings.locale === locale) return;
+    setSettings((prev) => ({ ...prev, locale }));
+    api.updateSettings({ locale }).catch(() => {});
+  }, [user, locale, settings.locale]);
+
+  const updateSetting = useCallback(
+    (patch: Partial<Pick<UserSettings, 'showHint' | 'showCategory'>>) => {
+      const previous = settings;
+      setSettings((prev) => ({ ...prev, ...patch }));
+      api.updateSettings(patch).catch((err: Error) => {
+        setSettings(previous);
+        setError(err.message);
+      });
+    },
+    [settings],
+  );
 
   const addPlayer = useCallback((name: string) => {
     const tempId = nextTempId.current--;
@@ -156,6 +193,7 @@ export function App() {
         game: buildGame(
           players.map((p) => p.name),
           config.impostorCount,
+          { showHint: settings.showHint, showCategory: settings.showCategory },
         ),
       });
       api
@@ -171,7 +209,7 @@ export function App() {
           setScreen((prev) => (prev.name === 'reveal' ? { name: 'setup' } : prev));
         });
     },
-    [locale, m, players],
+    [locale, m, players, settings.showHint, settings.showCategory],
   );
 
   const logout = useCallback(() => {
@@ -193,7 +231,13 @@ export function App() {
       {screen.name === 'login' && <LoginScreen />}
 
       {screen.name === 'home' && user && (
-        <HomeScreen user={user} onNewGame={() => setScreen({ name: 'setup' })} onLogout={logout} />
+        <HomeScreen
+          user={user}
+          settings={settings}
+          onUpdateSetting={updateSetting}
+          onNewGame={() => setScreen({ name: 'setup' })}
+          onLogout={logout}
+        />
       )}
 
       {screen.name === 'setup' && (

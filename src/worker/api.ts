@@ -6,6 +6,8 @@ import type {
   Providers,
   StartGameRequest,
   StartGameResponse,
+  UpdateSettingsRequest,
+  UserSettings,
 } from '../shared/types';
 import {
   MAX_PLAYERS,
@@ -35,10 +37,32 @@ apiRoutes.get('/providers', (c) => {
   return c.json(providers);
 });
 
+interface SettingsRow {
+  locale: string | null;
+  show_hint: number;
+  show_category: number;
+}
+
+function rowToSettings(row: SettingsRow): UserSettings {
+  return {
+    locale: row.locale,
+    showHint: row.show_hint !== 0,
+    showCategory: row.show_category !== 0,
+  };
+}
+
 apiRoutes.get('/me', async (c) => {
   const user = await getVerifiedSessionUser(c);
-  if (!user) return c.json({ user: null });
-  return c.json({ user });
+  if (!user) return c.json({ user: null, settings: null });
+  const row = await c.env.DB.prepare(
+    'SELECT locale, show_hint, show_category FROM users WHERE id = ?1',
+  )
+    .bind(user.id)
+    .first<SettingsRow>();
+  return c.json({
+    user,
+    settings: row ? rowToSettings(row) : { locale: null, showHint: true, showCategory: true },
+  });
 });
 
 // Everything below requires a session backed by an existing user.
@@ -64,6 +88,48 @@ apiRoutes.get('/categories', async (c) => {
     .bind(locale, DEFAULT_LOCALE)
     .all<Category>();
   return c.json({ categories: results });
+});
+
+// Partial update of user preferences; returns the full settings row.
+apiRoutes.put('/settings', async (c) => {
+  const user = c.get('user');
+  let body: UpdateSettingsRequest;
+  try {
+    body = await c.req.json<UpdateSettingsRequest>();
+  } catch {
+    return c.json({ error: 'invalid JSON body' }, 400);
+  }
+
+  const assignments: string[] = [];
+  const binds: (string | number)[] = [];
+  if (body.locale !== undefined) {
+    if (!isLocale(body.locale)) return c.json({ error: 'unsupported locale' }, 400);
+    binds.push(body.locale);
+    assignments.push(`locale = ?${binds.length}`);
+  }
+  if (body.showHint !== undefined) {
+    if (typeof body.showHint !== 'boolean') return c.json({ error: 'showHint must be boolean' }, 400);
+    binds.push(body.showHint ? 1 : 0);
+    assignments.push(`show_hint = ?${binds.length}`);
+  }
+  if (body.showCategory !== undefined) {
+    if (typeof body.showCategory !== 'boolean') {
+      return c.json({ error: 'showCategory must be boolean' }, 400);
+    }
+    binds.push(body.showCategory ? 1 : 0);
+    assignments.push(`show_category = ?${binds.length}`);
+  }
+  if (assignments.length === 0) return c.json({ error: 'no settings provided' }, 400);
+
+  binds.push(user.id);
+  const row = await c.env.DB.prepare(
+    `UPDATE users SET ${assignments.join(', ')} WHERE id = ?${binds.length}
+     RETURNING locale, show_hint, show_category`,
+  )
+    .bind(...binds)
+    .first<SettingsRow>();
+  if (!row) return c.json({ error: 'unauthorized' }, 401);
+  return c.json({ settings: rowToSettings(row) });
 });
 
 // ---------------------------------------------------------------------------
