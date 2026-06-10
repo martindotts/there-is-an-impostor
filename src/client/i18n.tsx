@@ -69,7 +69,7 @@ export interface Messages {
   secretWordWas: string;
   hintWas: (hint: string) => string;
   playAgain: string;
-  changeSetup: string;
+  exit: string;
 }
 
 const en: Messages = {
@@ -136,7 +136,7 @@ const en: Messages = {
   secretWordWas: 'The secret word was:',
   hintWas: (hint) => `The impostor hint was “${hint}”.`,
   playAgain: 'Play again',
-  changeSetup: 'Change setup',
+  exit: 'Exit',
 };
 
 const es: Messages = {
@@ -205,7 +205,7 @@ const es: Messages = {
   secretWordWas: 'La palabra secreta era:',
   hintWas: (hint) => `La pista del impostor era «${hint}».`,
   playAgain: 'Jugar de nuevo',
-  changeSetup: 'Cambiar configuración',
+  exit: 'Salir',
 };
 
 export const messages: Record<Locale, Messages> = { en, es };

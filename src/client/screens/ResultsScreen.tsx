@@ -4,10 +4,10 @@ import { useI18n } from '../i18n';
 interface Props {
   game: ActiveGame;
   onPlayAgain: () => void;
-  onNewSetup: () => void;
+  onExit: () => void;
 }
 
-export function ResultsScreen({ game, onPlayAgain, onNewSetup }: Props) {
+export function ResultsScreen({ game, onPlayAgain, onExit }: Props) {
   const { m } = useI18n();
   const impostors = game.players.filter((_, i) => game.impostor[i]);
 
@@ -33,8 +33,8 @@ export function ResultsScreen({ game, onPlayAgain, onNewSetup }: Props) {
         <button className="button primary big" onClick={onPlayAgain}>
           {m.playAgain}
         </button>
-        <button className="button big" onClick={onNewSetup}>
-          {m.changeSetup}
+        <button className="button big" onClick={onExit}>
+          {m.exit}
         </button>
       </div>
     </div>

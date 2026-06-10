@@ -270,7 +270,7 @@ export function App() {
         <ResultsScreen
           game={screen.game}
           onPlayAgain={() => lastConfig && startGame(lastConfig)}
-          onNewSetup={() => setScreen({ name: 'setup' })}
+          onExit={() => setScreen({ name: 'home' })}
         />
       )}
     </div>
