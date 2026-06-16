@@ -52,17 +52,17 @@ export interface Messages {
   whoHasPhone: string;
   passPhoneHint: string;
   privacyNote: string;
-  tapToReveal: string;
+  tapToFlip: string;
   hide: string;
   startDiscussion: string;
   categoryLabel: (name: string) => string;
-  youAreImpostor: string;
-  yourHint: string;
-  blendIn: string;
+  hintLabel: (hint: string) => string;
+  roleCompanion: string;
+  roleImpostor: string;
   secretWordIs: string;
-  describeCarefully: string;
   discussionTime: string;
-  discussionRules: (impostorCount: number) => string;
+  startsLabel: string;
+  discussionRules: string;
   impostorsHiding: (n: number) => string;
   revealImpostors: string;
   theReveal: string;
@@ -115,20 +115,18 @@ const en: Messages = {
   whoHasPhone: 'Who has the phone?',
   passPhoneHint: 'Pass the phone around. Each player taps their own name to see their word.',
   privacyNote: 'Make sure nobody else can see the screen.',
-  tapToReveal: 'Tap to reveal',
+  tapToFlip: 'Tap to flip',
   hide: 'Hide',
   startDiscussion: 'Start discussion',
   categoryLabel: (name) => `Category: ${name}`,
-  youAreImpostor: '🕵️ You are an impostor',
-  yourHint: 'Your hint:',
-  blendIn: "Blend in. Don't let them figure out you don't know the word.",
+  hintLabel: (hint) => `Hint: ${hint}`,
+  roleCompanion: 'Companion',
+  roleImpostor: 'Impostor',
   secretWordIs: 'The secret word is:',
-  describeCarefully: 'Describe it without giving it away — impostors are listening.',
   discussionTime: 'Discussion time',
-  discussionRules: (impostorCount) =>
-    `starts. Going around, everyone says one word or phrase about the secret word. Then vote on who the ${
-      impostorCount > 1 ? 'impostors are' : 'impostor is'
-    }.`,
+  startsLabel: 'Starts:',
+  discussionRules:
+    'Taking turns, everyone says one word or phrase about the secret word. Then decide who to vote out.',
   impostorsHiding: (n) =>
     n === 1 ? '1 impostor is hiding among you.' : `${n} impostors are hiding among you.`,
   revealImpostors: 'Reveal the impostors',
@@ -182,20 +180,18 @@ const es: Messages = {
   whoHasPhone: '¿Quién tiene el teléfono?',
   passPhoneHint: 'Vayan pasando el teléfono. Cada jugador toca su nombre para ver su palabra.',
   privacyNote: 'Asegúrate de que nadie más vea la pantalla.',
-  tapToReveal: 'Toca para revelar',
+  tapToFlip: 'Toca para dar la vuelta',
   hide: 'Ocultar',
   startDiscussion: 'Comenzar el debate',
   categoryLabel: (name) => `Categoría: ${name}`,
-  youAreImpostor: '🕵️ Eres un impostor',
-  yourHint: 'Tu pista:',
-  blendIn: 'Mimetízate. Que no descubran que no conoces la palabra.',
+  hintLabel: (hint) => `Pista: ${hint}`,
+  roleCompanion: 'Compañero',
+  roleImpostor: 'Impostor',
   secretWordIs: 'La palabra secreta es:',
-  describeCarefully: 'Descríbela sin delatarla: los impostores están escuchando.',
   discussionTime: 'Hora del debate',
-  discussionRules: (impostorCount) =>
-    `comienza. Por turnos, cada uno dice una palabra o frase sobre la palabra secreta. Luego voten ${
-      impostorCount > 1 ? 'quiénes son los impostores' : 'quién es el impostor'
-    }.`,
+  startsLabel: 'Comienza:',
+  discussionRules:
+    'Por turnos, cada uno dice una palabra o frase sobre la palabra secreta. Luego, decidan a quién expulsar.',
   impostorsHiding: (n) =>
     n === 1
       ? 'Hay 1 impostor escondido entre ustedes.'

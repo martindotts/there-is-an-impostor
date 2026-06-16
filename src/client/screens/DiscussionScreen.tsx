@@ -8,18 +8,14 @@ interface Props {
 
 export function DiscussionScreen({ game, onReveal }: Props) {
   const { m } = useI18n();
-  const impostorCount = game.impostor.filter(Boolean).length;
   return (
     <div className="centered discussion">
       <div className="logo">🗣️</div>
       <h1>{m.discussionTime}</h1>
-      {game.round && game.showCategory && (
-        <p className="muted">{m.categoryLabel(game.round.category)}</p>
-      )}
       <p>
-        <strong>{game.players[game.startingPlayer]}</strong> {m.discussionRules(impostorCount)}
+        {m.startsLabel} <strong>{game.players[game.startingPlayer]}</strong>
       </p>
-      <p className="muted small">{m.impostorsHiding(impostorCount)}</p>
+      <p>{m.discussionRules}</p>
       <button className="button primary big" onClick={onReveal}>
         {m.revealImpostors}
       </button>
