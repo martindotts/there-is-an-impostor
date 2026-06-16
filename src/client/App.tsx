@@ -3,7 +3,7 @@ import type { Category, Player, SessionUser, UserSettings } from '../shared/type
 import { isLocale } from '../shared/i18n';
 import { api } from './api';
 import { clearCache, readCache, writeCache } from './cache';
-import type { ActiveGame } from './game';
+import type { ActiveGame, Winner } from './game';
 import { buildGame } from './game';
 import { useI18n } from './i18n';
 import { LoginScreen } from './screens/LoginScreen';
@@ -11,6 +11,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { SetupScreen } from './screens/SetupScreen';
 import { RevealScreen } from './screens/RevealScreen';
 import { DiscussionScreen } from './screens/DiscussionScreen';
+import { EjectionScreen } from './screens/EjectionScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
 
 type Screen =
@@ -20,7 +21,8 @@ type Screen =
   | { name: 'setup' }
   | { name: 'reveal'; game: ActiveGame }
   | { name: 'discussion'; game: ActiveGame }
-  | { name: 'results'; game: ActiveGame };
+  | { name: 'ejection'; game: ActiveGame }
+  | { name: 'results'; game: ActiveGame; winner: Winner };
 
 export interface GameConfig {
   categoryIds: number[];
@@ -262,13 +264,21 @@ export function App() {
       {screen.name === 'discussion' && (
         <DiscussionScreen
           game={screen.game}
-          onReveal={() => setScreen({ name: 'results', game: screen.game })}
+          onStartVoting={() => setScreen({ name: 'ejection', game: screen.game })}
+        />
+      )}
+
+      {screen.name === 'ejection' && (
+        <EjectionScreen
+          game={screen.game}
+          onGameOver={(winner) => setScreen({ name: 'results', game: screen.game, winner })}
         />
       )}
 
       {screen.name === 'results' && (
         <ResultsScreen
           game={screen.game}
+          winner={screen.winner}
           onPlayAgain={() => lastConfig && startGame(lastConfig)}
           onExit={() => setScreen({ name: 'home' })}
         />

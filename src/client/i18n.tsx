@@ -63,11 +63,17 @@ export interface Messages {
   discussionTime: string;
   startsLabel: string;
   discussionRules: string;
-  impostorsHiding: (n: number) => string;
-  revealImpostors: string;
-  theReveal: string;
+  startVoting: string;
+  whoToEject: string;
+  wasImpostor: string;
+  wasNotImpostor: string;
+  continueGame: string;
+  seeResult: string;
+  companionsWin: string;
+  impostorsWin: string;
+  impostorsWereLabel: (count: number) => string;
   secretWordWas: string;
-  hintWas: (hint: string) => string;
+  hintWasLabel: string;
   playAgain: string;
   exit: string;
 }
@@ -127,12 +133,17 @@ const en: Messages = {
   startsLabel: 'Starts:',
   discussionRules:
     'Taking turns, everyone says one word or phrase about the secret word. Then decide who to vote out.',
-  impostorsHiding: (n) =>
-    n === 1 ? '1 impostor is hiding among you.' : `${n} impostors are hiding among you.`,
-  revealImpostors: 'Reveal the impostors',
-  theReveal: 'The reveal',
+  startVoting: 'Start voting',
+  whoToEject: 'Who gets voted out?',
+  wasImpostor: 'Was an impostor',
+  wasNotImpostor: 'Was not an impostor',
+  continueGame: 'Continue',
+  seeResult: 'See the result',
+  companionsWin: 'Companions win!',
+  impostorsWin: 'Impostors win!',
+  impostorsWereLabel: (count) => (count === 1 ? 'The impostor was:' : 'The impostors were:'),
   secretWordWas: 'The secret word was:',
-  hintWas: (hint) => `The impostor hint was “${hint}”.`,
+  hintWasLabel: 'The impostor hint was:',
   playAgain: 'Play again',
   exit: 'Exit',
 };
@@ -192,14 +203,17 @@ const es: Messages = {
   startsLabel: 'Comienza:',
   discussionRules:
     'Por turnos, cada uno dice una palabra o frase sobre la palabra secreta. Luego, decidan a quién expulsar.',
-  impostorsHiding: (n) =>
-    n === 1
-      ? 'Hay 1 impostor escondido entre ustedes.'
-      : `Hay ${n} impostores escondidos entre ustedes.`,
-  revealImpostors: 'Revelar a los impostores',
-  theReveal: 'La revelación',
+  startVoting: 'Comenzar la votación',
+  whoToEject: '¿A quién expulsan?',
+  wasImpostor: 'Era un impostor',
+  wasNotImpostor: 'No era un impostor',
+  continueGame: 'Continuar',
+  seeResult: 'Ver el resultado',
+  companionsWin: '¡Ganan los compañeros!',
+  impostorsWin: '¡Ganan los impostores!',
+  impostorsWereLabel: (count) => (count === 1 ? 'El impostor era:' : 'Los impostores eran:'),
   secretWordWas: 'La palabra secreta era:',
-  hintWas: (hint) => `La pista del impostor era «${hint}».`,
+  hintWasLabel: 'La pista del impostor fue:',
   playAgain: 'Jugar de nuevo',
   exit: 'Salir',
 };

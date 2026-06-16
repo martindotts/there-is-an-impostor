@@ -38,3 +38,30 @@ export function buildGame(players: string[], impostorCount: number, options: Gam
     showCategory: options.showCategory,
   };
 }
+
+/** Who took the round once a win condition is met. */
+export type Winner = 'companions' | 'impostors';
+
+/** Counts the players still in the game (not yet voted out), split by role. */
+export function countRemaining(
+  game: ActiveGame,
+  ejected: boolean[],
+): { impostors: number; companions: number } {
+  let impostors = 0;
+  let companions = 0;
+  for (let i = 0; i < game.players.length; i++) {
+    if (ejected[i]) continue;
+    if (game.impostor[i]) impostors++;
+    else companions++;
+  }
+  return { impostors, companions };
+}
+
+/** Among Us-style parity rule, evaluated after each ejection: companions win
+ *  once every impostor is out; impostors win once they no longer are a strict
+ *  minority. Returns null while the game is still undecided. */
+export function decideWinner(impostors: number, companions: number): Winner | null {
+  if (impostors === 0) return 'companions';
+  if (impostors >= companions) return 'impostors';
+  return null;
+}
