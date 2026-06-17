@@ -7,6 +7,7 @@ import { readPref, writePref } from '../cache';
 import { useI18n } from '../i18n';
 
 const CATEGORIES_PREF = 'categories';
+const IMPOSTORS_PREF = 'impostors';
 
 interface Props {
   categories: Category[];
@@ -36,7 +37,11 @@ export function SetupScreen({
     const stored = initialConfig?.categoryIds ?? readPref<number[]>(CATEGORIES_PREF);
     return new Set(stored?.length ? stored : categories.map((c) => c.id));
   });
-  const [impostors, setImpostors] = useState(initialConfig?.impostorCount ?? 1);
+  // Restore the last impostor count (device-local), like the category
+  // selection; fall back to the in-session config, then to 1.
+  const [impostors, setImpostors] = useState<number>(
+    () => initialConfig?.impostorCount ?? readPref<number>(IMPOSTORS_PREF) ?? 1,
+  );
 
   // The category list can arrive (or change) after mount: drop selected ids
   // that no longer exist, and default to all if nothing valid remains.
@@ -60,6 +65,12 @@ export function SetupScreen({
   useEffect(() => {
     if (impostors > impostorCap) setImpostors(impostorCap);
   }, [impostors, impostorCap]);
+
+  // Remember the impostor count for next time (device-local). Only persist
+  // with a real roster so a transiently empty one can't clobber it.
+  useEffect(() => {
+    if (players.length >= MIN_PLAYERS) writePref(IMPOSTORS_PREF, impostors);
+  }, [impostors, players.length]);
 
   const allSelected = selected.size === categories.length;
   const enoughPlayers = players.length >= MIN_PLAYERS;
