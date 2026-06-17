@@ -58,6 +58,11 @@ h2 {
   animation: pulse 1.2s ease-in-out infinite;
 }
 
+/* Hidden but still reserving its layout space. */
+.invisible {
+  visibility: hidden;
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.35; }
@@ -601,20 +606,30 @@ h2 {
   word-break: break-word;
 }
 
-/* ----- reveal flip card ----- */
+/* ----- reveal flip card (pops up over the dimmed roster) ----- */
 
-.flip-card-screen {
-  flex: 1;
+.card-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 24px 0;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px;
+  background: rgba(8, 10, 16, 0.72);
+  animation: overlay-in 0.18s ease-out;
 }
 
 .flip-card {
-  flex: 1;
   position: relative;
   perspective: 1400px;
+  width: min(84vw, 330px);
+  aspect-ratio: 3 / 4;
+  /* No fill mode: the card settles back to an untransformed state so the
+     perspective stays clean for the flip. The last keyframe is identity. */
+  animation: card-pop 0.34s cubic-bezier(0.34, 1.45, 0.5, 1);
 }
 
 .flip-inner {
@@ -626,6 +641,16 @@ h2 {
 
 .flip-card.flipped .flip-inner {
   transform: rotateY(180deg);
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes card-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.82); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .flip-face {
