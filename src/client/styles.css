@@ -609,6 +609,7 @@ h2 {
 /* ----- reveal flip card (pops up over the dimmed roster) ----- */
 
 .card-overlay {
+  --card-width: min(84vw, 330px);
   position: fixed;
   inset: 0;
   z-index: 50;
@@ -622,10 +623,15 @@ h2 {
   animation: overlay-in 0.18s ease-out;
 }
 
+/* The hide button tracks the card's width so they line up. */
+.card-overlay > .button {
+  width: var(--card-width);
+}
+
 .flip-card {
   position: relative;
   perspective: 1400px;
-  width: min(84vw, 330px);
+  width: var(--card-width);
   aspect-ratio: 3 / 4;
   /* No fill mode: the card settles back to an untransformed state so the
      perspective stays clean for the flip. The last keyframe is identity. */
