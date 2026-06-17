@@ -31,7 +31,12 @@ async function upsertUser(
 ): Promise<SessionUser> {
   const row = await db
     .prepare(
-      `INSERT INTO users (provider, provider_id, email, name, picture) VALUES (?1, ?2, ?3, ?4, ?5)
+      // show_category is set explicitly (not left to the column default) so new
+      // users get it off everywhere: databases migrated before the default was
+      // flipped to 0 still carry the old DEFAULT 1. ON CONFLICT does not touch
+      // it, so returning users keep whatever they had chosen.
+      `INSERT INTO users (provider, provider_id, email, name, picture, show_category)
+       VALUES (?1, ?2, ?3, ?4, ?5, 0)
        ON CONFLICT(provider, provider_id) DO UPDATE SET
          email = COALESCE(excluded.email, users.email),
          name = COALESCE(excluded.name, users.name),
