@@ -29,7 +29,7 @@ export interface GameConfig {
   impostorCount: number;
 }
 
-const DEFAULT_SETTINGS: UserSettings = { locale: null, showHint: true, showCategory: true };
+const DEFAULT_SETTINGS: UserSettings = { locale: null, showHint: true, showCategory: false };
 
 export function App() {
   const { locale, setLocale, m } = useI18n();

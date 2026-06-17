@@ -62,7 +62,7 @@ apiRoutes.get('/me', async (c) => {
     .first<SettingsRow>();
   return c.json({
     user,
-    settings: row ? rowToSettings(row) : { locale: null, showHint: true, showCategory: true },
+    settings: row ? rowToSettings(row) : { locale: null, showHint: true, showCategory: false },
   });
 });
 
