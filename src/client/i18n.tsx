@@ -149,7 +149,7 @@ const en: Messages = {
 };
 
 const es: Messages = {
-  tagline: 'Todos reciben la palabra secreta, excepto los impostores. Encuéntralos antes de que se mimeticen.',
+  tagline: 'Todos reciben la palabra secreta, excepto los impostores. Encuéntralos antes de que ganen.',
   featureEndlessTitle: 'Palabras infinitas',
   featureEndlessText: 'el mazo crece solo con IA',
   featureNoRepeatTitle: 'Nunca repetidas',
