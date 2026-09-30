@@ -3,7 +3,8 @@ import { useI18n } from '../i18n';
 
 interface Props {
   game: ActiveGame;
-  winner: Winner;
+  /** Null when the group skipped the voting with "reveal everyone". */
+  winner: Winner | null;
   onPlayAgain: () => void;
   onExit: () => void;
 }
@@ -14,13 +15,24 @@ export function ResultsScreen({ game, winner, onPlayAgain, onExit }: Props) {
   const impostorsWon = winner === 'impostors';
 
   return (
-    <div className={`centered results ${impostorsWon ? 'impostor' : ''}`}>
-      <div className="logo">{impostorsWon ? '🕵️' : '🎉'}</div>
-      <h1>{impostorsWon ? m.impostorsWin : m.companionsWin}</h1>
-      <p>
-        <span className="muted">{m.impostorsWereLabel(impostors.length)}</span>{' '}
-        <strong>{impostors.join(', ')}</strong>
-      </p>
+    <div className={`centered results ${winner === null ? 'revealed' : impostorsWon ? 'impostor' : ''}`}>
+      <div className="logo">{winner === null ? '👀' : impostorsWon ? '🕵️' : '🎉'}</div>
+      <h1>{winner === null ? m.allRevealed : impostorsWon ? m.impostorsWin : m.companionsWin}</h1>
+      {winner === null ? (
+        <ul className="role-list">
+          {game.players.map((name, i) => (
+            <li key={i} className={game.impostor[i] ? 'impostor' : ''}>
+              <span className="roster-name">{name}</span>
+              <span className="role-tag">{game.impostor[i] ? m.roleImpostor : m.roleCompanion}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>
+          <span className="muted">{m.impostorsWereLabel(impostors.length)}</span>{' '}
+          <strong>{impostors.join(', ')}</strong>
+        </p>
+      )}
       {game.round && (
         <>
           <p>

@@ -6,6 +6,8 @@ import { useI18n } from '../i18n';
 interface Props {
   game: ActiveGame;
   onGameOver: (winner: Winner) => void;
+  /** Skips the rest of the voting and reveals every player's role at once. */
+  onRevealAll: () => void;
 }
 
 /**
@@ -13,7 +15,7 @@ interface Props {
  * ejection reveals whether that player was an impostor, then the parity rule
  * (see decideWinner) decides whether the game continues or someone has won.
  */
-export function EjectionScreen({ game, onGameOver }: Props) {
+export function EjectionScreen({ game, onGameOver, onRevealAll }: Props) {
   const { m } = useI18n();
   const [ejected, setEjected] = useState<boolean[]>(() => game.players.map(() => false));
   const [justEjected, setJustEjected] = useState<number | null>(null);
@@ -59,6 +61,9 @@ export function EjectionScreen({ game, onGameOver }: Props) {
           ),
         )}
       </ul>
+      <button className="button big" onClick={onRevealAll}>
+        {m.revealAll}
+      </button>
     </div>
   );
 }

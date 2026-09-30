@@ -22,7 +22,7 @@ type Screen =
   | { name: 'reveal'; game: ActiveGame }
   | { name: 'discussion'; game: ActiveGame }
   | { name: 'ejection'; game: ActiveGame }
-  | { name: 'results'; game: ActiveGame; winner: Winner };
+  | { name: 'results'; game: ActiveGame; winner: Winner | null };
 
 export interface GameConfig {
   categoryIds: number[];
@@ -272,6 +272,7 @@ export function App() {
         <EjectionScreen
           game={screen.game}
           onGameOver={(winner) => setScreen({ name: 'results', game: screen.game, winner })}
+          onRevealAll={() => setScreen({ name: 'results', game: screen.game, winner: null })}
         />
       )}
 

@@ -69,6 +69,8 @@ export interface Messages {
   wasNotImpostor: string;
   continueGame: string;
   seeResult: string;
+  revealAll: string;
+  allRevealed: string;
   companionsWin: string;
   impostorsWin: string;
   impostorsWereLabel: (count: number) => string;
@@ -139,6 +141,8 @@ const en: Messages = {
   wasNotImpostor: 'Was not an impostor',
   continueGame: 'Continue',
   seeResult: 'See the result',
+  revealAll: 'Reveal everyone',
+  allRevealed: 'Everyone revealed',
   companionsWin: 'Companions win!',
   impostorsWin: 'Impostors win!',
   impostorsWereLabel: (count) => (count === 1 ? 'The impostor was:' : 'The impostors were:'),
@@ -209,6 +213,8 @@ const es: Messages = {
   wasNotImpostor: 'No era un impostor',
   continueGame: 'Continuar',
   seeResult: 'Ver el resultado',
+  revealAll: 'Revelar todo',
+  allRevealed: 'Todos revelados',
   companionsWin: '¡Ganan los compañeros!',
   impostorsWin: '¡Ganan los impostores!',
   impostorsWereLabel: (count) => (count === 1 ? 'El impostor era:' : 'Los impostores eran:'),
