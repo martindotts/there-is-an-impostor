@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Settings, UserRound, X } from 'lucide-react';
 import type { SessionUser, UserSettings } from '../../shared/types';
 import { FeatureList } from '../FeatureList';
+import { useBackHandler } from '../back';
 import { LocaleSwitcher, useI18n } from '../i18n';
 
 type SettingsPatch = Partial<Pick<UserSettings, 'showHint' | 'showCategory'>>;
@@ -18,6 +19,10 @@ export function HomeScreen({ user, settings, onUpdateSetting, onNewGame, onLogou
   const { m } = useI18n();
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  useBackHandler(profileOpen || settingsOpen, () => {
+    setProfileOpen(false);
+    setSettingsOpen(false);
+  });
 
   return (
     <>

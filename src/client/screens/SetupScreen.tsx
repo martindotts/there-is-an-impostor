@@ -4,6 +4,7 @@ import type { Category, Player } from '../../shared/types';
 import { MAX_PLAYERS, MAX_PLAYER_NAME_LENGTH, MIN_PLAYERS, maxImpostors } from '../../shared/types';
 import type { GameConfig } from '../App';
 import { readPref, writePref } from '../cache';
+import { useBackHandler } from '../back';
 import { useI18n } from '../i18n';
 
 const CATEGORIES_PREF = 'categories';
@@ -31,6 +32,7 @@ export function SetupScreen({
 }: Props) {
   const { m } = useI18n();
   const [step, setStep] = useState<1 | 2>(1);
+  useBackHandler(step === 2, () => setStep(1));
   // Restore the last selection (kept in localStorage, device-local only);
   // fall back to all categories selected.
   const [selected, setSelected] = useState<Set<number>>(() => {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Category, Player, SessionUser, UserSettings } from '../shared/types';
 import { isLocale } from '../shared/i18n';
 import { api } from './api';
+import { useBackHandler } from './back';
 import { clearCache, readCache, writeCache } from './cache';
 import type { ActiveGame, Winner } from './game';
 import { buildGame } from './game';
@@ -19,7 +20,8 @@ type Screen =
   | { name: 'login' }
   | { name: 'home' }
   | { name: 'setup' }
-  | { name: 'reveal'; game: ActiveGame }
+  // allSeen: re-entered with the back button, after everyone already looked.
+  | { name: 'reveal'; game: ActiveGame; allSeen?: boolean }
   | { name: 'discussion'; game: ActiveGame }
   | { name: 'ejection'; game: ActiveGame }
   | { name: 'results'; game: ActiveGame; winner: Winner | null };
@@ -27,6 +29,26 @@ type Screen =
 export interface GameConfig {
   categoryIds: number[];
   impostorCount: number;
+}
+
+/** Where the back button leads from each screen; null for the root screens,
+ *  where back leaves the app as usual. Going back from the results skips the
+ *  voting, since the game is already decided. */
+function parentScreen(screen: Screen): Screen | null {
+  switch (screen.name) {
+    case 'setup':
+      return { name: 'home' };
+    case 'reveal':
+      return { name: 'setup' };
+    case 'discussion':
+      return { name: 'reveal', game: screen.game, allSeen: true };
+    case 'ejection':
+      return { name: 'discussion', game: screen.game };
+    case 'results':
+      return { name: 'home' };
+    default:
+      return null;
+  }
 }
 
 const DEFAULT_SETTINGS: UserSettings = { locale: null, showHint: true, showCategory: false };
@@ -45,6 +67,8 @@ export function App() {
   const [screen, setScreen] = useState<Screen>(() =>
     readCache<SessionUser>('user') ? { name: 'home' } : { name: 'loading' },
   );
+  const parent = parentScreen(screen);
+  useBackHandler(parent !== null, () => parent && setScreen(parent));
   const [lastConfig, setLastConfig] = useState<GameConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -257,6 +281,7 @@ export function App() {
       {screen.name === 'reveal' && (
         <RevealScreen
           game={screen.game}
+          allSeen={screen.allSeen}
           onDone={() => setScreen({ name: 'discussion', game: screen.game })}
         />
       )}

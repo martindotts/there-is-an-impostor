@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Check } from 'lucide-react';
 import type { ActiveGame } from '../game';
+import { useBackHandler } from '../back';
 import { useI18n } from '../i18n';
 
 interface Props {
   game: ActiveGame;
+  /** Start with every player marked as seen (coming back from the discussion). */
+  allSeen?: boolean;
   onDone: () => void;
 }
 
@@ -15,9 +18,9 @@ interface Props {
  * impostor's hint), hide it, and pass the phone on. Once everyone has looked,
  * the discussion can start.
  */
-export function RevealScreen({ game, onDone }: Props) {
+export function RevealScreen({ game, allSeen = false, onDone }: Props) {
   const { m } = useI18n();
-  const [revealed, setRevealed] = useState<boolean[]>(() => game.players.map(() => false));
+  const [revealed, setRevealed] = useState<boolean[]>(() => game.players.map(() => allSeen));
   const [current, setCurrent] = useState<number | null>(null);
   const [flipped, setFlipped] = useState(false);
 
@@ -28,6 +31,12 @@ export function RevealScreen({ game, onDone }: Props) {
     setCurrent(null);
     setFlipped(false);
   };
+
+  // Back closes the card; it only counts as seen if it was already flipped.
+  useBackHandler(current !== null, () => {
+    if (flipped) close();
+    else setCurrent(null);
+  });
 
   // The game starts before the server answers with the word, so the back of
   // the card may not have content yet; it falls back to a loading line.
